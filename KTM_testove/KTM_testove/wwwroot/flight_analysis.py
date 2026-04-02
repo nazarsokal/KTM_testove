@@ -15,7 +15,7 @@ else:
 flight_data = os.path.join(LOGS_DIR, filename)
 
 if not os.path.exists(flight_data):
-    print(f"Error: {flight_data} not found.")
+    print(json.dumps({"error": f"{flight_data} not found."}))
     sys.exit(1)
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -40,8 +40,6 @@ mlog = mavutil.mavlink_connection(flight_data)
 
 imu_data = []
 gps_data = []
-
-print(f"Парсинг {filename}...")
 
 while True:
     msg = mlog.recv_match(type=['IMU', 'GPS'], blocking=False)
@@ -69,7 +67,7 @@ while True:
         })
 
 if not gps_data or not imu_data:
-    print("Error: Недостатньо даних (GPS або IMU) у файлі.")
+    print(json.dumps({"error": "Недостатньо даних (GPS або IMU) у файлі."}))
     sys.exit(1)
 
 df_gps = pd.DataFrame(gps_data)
@@ -139,8 +137,4 @@ output = {
     "trajectory": trajectory
 }
 
-output_filename = 'flight_analysis.json'
-with open(output_filename, 'w', encoding='utf-8') as f:
-    json.dump(output, f, indent=4)
-    
-print(f"Success: {output_filename} створено успішно.")
+print(json.dumps(output))

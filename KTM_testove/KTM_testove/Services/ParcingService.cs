@@ -31,5 +31,15 @@ public class ParcingService : IParcingService
         string output = await process.StandardOutput.ReadToEndAsync();
         string errors = await process.StandardError.ReadToEndAsync();
         await process.WaitForExitAsync();
+       
+        
+        if (process.ExitCode != 0)
+        {
+            return null;
+        }
+        else
+        {
+            //jkhfkugf
+        }
     }
 }
