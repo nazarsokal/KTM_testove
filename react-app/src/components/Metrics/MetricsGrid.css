@@ -1,0 +1,15 @@
+.metrics-grid {
+    display: grid;
+    /* Створює 4 колонки однакової ширини */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 20px;
+    background-color: #0b0f13; /* Темний фон всього дашборду */
+}
+
+/* Адаптивність для менших екранів */
+@media (max-width: 1024px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
