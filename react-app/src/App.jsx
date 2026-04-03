@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import MetricsGrid from './components/Metrics/MetricsGrid';
 import FileUploader from './components/Upload/FileUploader';
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [telemetryData, setTelemetryData] = useState(null);
+
+    const handleUploadSuccess = (data) => {
+        setTelemetryData(data);
+    };
 
   return (
     <>
@@ -36,13 +37,15 @@ function App() {
         <header className="dashboard-header">
             <div className="header-content">
                 <h1>System for Flight Telemetry Analysis</h1>
-                <FileUploader onFileUpload={(file) => console.log("Завантажено:", file)} />
+                <FileUploader onUploadSuccess={handleUploadSuccess} />
             </div>
         </header>
 
-      <section className="metrics-section">
-        <MetricsGrid />
-      </section>
+
+
+        <section className="metrics-section">
+            <MetricsGrid data={telemetryData} />
+        </section>
 
 
 
