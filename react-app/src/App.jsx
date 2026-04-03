@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import MetricsGrid from './components/Metrics/MetricsGrid';
+import FileUploader from './components/Upload/FileUploader';
 import './App.css'
 
 function App() {
@@ -32,7 +33,12 @@ function App() {
 
       {/*<div className="ticks"></div>*/}
 
-
+        <header className="dashboard-header">
+            <div className="header-content">
+                <h1>System for Flight Telemetry Analysis</h1>
+                <FileUploader onFileUpload={(file) => console.log("Завантажено:", file)} />
+            </div>
+        </header>
 
       <section className="metrics-section">
         <MetricsGrid />
