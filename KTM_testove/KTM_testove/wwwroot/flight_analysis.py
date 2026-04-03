@@ -8,7 +8,7 @@ import json
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 else:
-    filename = '00000001.BIN'
+    filename = '00000019.BIN'
 
 clean_path = filename.replace('file:///', '').replace('file:', '')
 
