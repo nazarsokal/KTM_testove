@@ -1,3 +1,4 @@
+using KTM_testove.Contracts.Request;
 using KTM_testove.Services.ServiceAbstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,6 @@ public class HomeController : ControllerBase
 {
     private readonly IParsingService _parsingService;
     private readonly IAiFeedbackService _aiiFeedbackService;
-
     public HomeController(IParsingService parsingService, IAiFeedbackService aiiFeedbackService)
     {
         _parsingService = parsingService;
@@ -19,14 +19,27 @@ public class HomeController : ControllerBase
     [Route("/file/load")]
     public async Task<IActionResult> LoadFile(IFormFile file)
     {
-        var result = await _parsingService.Parse(file);
-        return Content(result, "application/json");
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("Файл не вибрано або він порожній.");
+        }
+
+        try
+        {
+            var result = await _parsingService.Parse(file);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
-    [HttpGet("ai/result/{result}")]
-    public async Task<IActionResult> GetFeedback(string result)
+    [HttpPost("ai/result/{language}")]
+    public async Task<IActionResult> GetFeedback([FromBody] AiFeedbackRequest request, string language = "English")
     {
-        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(result);
+        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(request, language);
         return Ok(aiResult);
     }
 }
