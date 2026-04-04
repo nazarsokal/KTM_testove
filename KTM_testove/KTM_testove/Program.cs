@@ -3,6 +3,16 @@ using KTM_testove.Services.ServiceAbstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -12,7 +22,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IParsingService, ParsingService>();
 builder.Services.AddHttpClient<IAiFeedbackService, AiFeedbackService>();
 var app = builder.Build();
-
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
