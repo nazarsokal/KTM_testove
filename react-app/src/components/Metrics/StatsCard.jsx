@@ -1,12 +1,11 @@
 import React from 'react';
 import './StatsCard.css';
 
-const StatsCard = ({ title, value, unit, icon, trend }) => {
+const StatsCard = ({ title, value, unit, icon }) => {
     return (
         <div className="stats-card">
             <div className="card-header">
                 <div className="icon-container">{icon}</div>
-                {trend && <span className="trend">{trend}</span>}
             </div>
             <div className="card-content">
                 <p className="card-title">{title}</p>

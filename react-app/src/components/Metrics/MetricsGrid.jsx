@@ -6,51 +6,57 @@ import './MetricsGrid.css';
 
 // Іконки можна взяти з бібліотеки lucide-react або react-icons
 import { Navigation, Gauge, Zap, Clock } from 'lucide-react';
+import { useFlightContext } from '../../context/FlightContext.jsx';
 
 const MetricsGrid = () => {
+    const { summary } = useFlightContext();
     const { t } = useTranslation();
 
-    const mockData = [
+    const formatDuration = (seconds) => {
+        if (!seconds) return "00:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
+    const metrics = [
         {
             title: t("metrics.totalDistance"),
-            value: "12.47",
+            // converts to kilometers
+            value: summary?.total_distance ? (summary.total_distance / 1000).toFixed(2) : "0.00",
             unit: t("units.kilometers"),
-            icon: <Navigation size={20} color="#00d1ff" />,
-            trend: "+2.3%"
+            icon: <Navigation size={20} color="#00d1ff" />
         },
         {
             title: t("metrics.maxSpeed"),
-            value: "68.5",
+            value: summary?.max_horizontal_speed ? summary.max_horizontal_speed.toFixed(1) : "0.0",
             unit: `${t("units.meters")}/${t("units.seconds")}`,
-            icon: <Gauge size={20} color="#00d1ff" />,
-            trend: "↑ 12%"
+            icon: <Gauge size={20} color="#00d1ff" />
         },
         {
             title: t("metrics.maxAcceleration"),
-            value: "4.82",
+            value: summary?.max_acceleration ? summary.max_acceleration.toFixed(2) : "0.00",
             unit: `${t("units.meters")}/${t("units.seconds")}²`,
-            icon: <Zap size={20} color="#00d1ff" />,
-            trend: null
+            icon: <Zap size={20} color="#00d1ff" />
         },
         {
             title: t("metrics.flightDuration"),
-            value: "24:18",
+            value: formatDuration(summary?.duration_seconds),
             unit: t("units.minutes"),
-            icon: <Clock size={20} color="#00d1ff" />,
-            trend: null
+            icon: <Clock size={20} color="#00d1ff" />
         }
     ];
 
     return (
         <div className="metrics-grid">
-            {mockData.map((item, index) => (
+            {metrics.map((item, index) => (
                 <StatsCard
-                    key={index}
+                    // metrics array doesn't get mutated, so it's okay to use index as a key
+                    key={index} 
                     title={item.title}
                     value={item.value}
                     unit={item.unit}
                     icon={item.icon}
-                    trend={item.trend}
                 />
             ))}
         </div>

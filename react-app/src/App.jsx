@@ -1,17 +1,14 @@
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react'
+import { useFlightContext } from './context/FlightContext';
 import MetricsGrid from './components/Metrics/MetricsGrid';
 import FileUploader from './components/Upload/FileUploader';
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
 import './App.css'
+import { Trash2 } from 'lucide-react';
 
 function App() {
-    const [telemetryData, setTelemetryData] = useState(null);
+    const { data, clearData, error } = useFlightContext();
     const { t } = useTranslation(); 
-
-    const handleUploadSuccess = (data) => {
-        setTelemetryData(data);
-    };
 
   return (
     <>
@@ -19,14 +16,24 @@ function App() {
             <div className="header-content">
                 <h1>{t("app.title")}</h1>
                 <LanguageSwitcher />
-                <FileUploader onUploadSuccess={handleUploadSuccess} />
+                {data && data.length > 0 && (
+                    <button className="clear-data-btn" onClick={() => clearData()}>
+                        <Trash2 size={16} />
+                        {t("app.clearData")}
+                    </button>
+                )}
+                <FileUploader />
             </div>
         </header>
 
-
+        {error && (
+            <div className="error-message">
+                {t('app.error')}: {error}
+            </div>
+        )}
 
         <section className="metrics-section">
-            <MetricsGrid data={telemetryData} />
+            <MetricsGrid />
         </section>
       <div className="ticks"></div>
       <section id="spacer"></section>
