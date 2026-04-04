@@ -287,3 +287,8 @@ body {
     border-color: #ff7b72;
     background: rgba(255, 123, 114, 0.1); /* Легке червоне підсвічування */
 }
+
+.flight-visuals-section {
+    width: calc(100% - 40px);
+    margin: auto;
+}
