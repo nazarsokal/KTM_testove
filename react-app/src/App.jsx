@@ -4,6 +4,7 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import MetricsGrid from './components/Metrics/MetricsGrid';
 import FileUploader from './components/Upload/FileUploader';
+import AIAssistant from "./components/AI/AIAssistant";
 import './App.css'
 
 function App() {
@@ -44,7 +45,11 @@ function App() {
         <MetricsGrid />
       </section>
 
-
+        <main className="dashboard-main">
+            <section className="ai-section">
+                <AIAssistant />
+            </section>
+        </main>
 
       {/*<section id="next-steps">*/}
       {/*  <div id="docs">*/}
