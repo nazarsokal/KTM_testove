@@ -3,6 +3,7 @@ import { useFlightContext } from './context/FlightContext';
 import MetricsGrid from './components/Metrics/MetricsGrid';
 import FileUploader from './components/Upload/FileUploader';
 import LanguageSwitcher from './components/LanguageSwitcher/LanguageSwitcher';
+import FlightPanel from './components/FlightPanel/FlightPanel';
 import './App.css'
 import { Trash2 } from 'lucide-react';
 
@@ -35,8 +36,14 @@ function App() {
         <section className="metrics-section">
             <MetricsGrid />
         </section>
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+
+        {data && data.length > 0 && (
+                <section className="flight-visuals-section" style={{ marginTop: '20px' }}>
+                    <FlightPanel />
+                </section>
+            )}
+        <div className="ticks"></div>
+        <section id="spacer"></section>
     </>
   )
 }

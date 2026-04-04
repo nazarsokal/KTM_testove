@@ -20,5 +20,18 @@
     "kilometers": "km",
     "seconds": "s",
     "minutes": "min"
-  }
+  },
+  "flightPanel": {
+    "time": "Flight Time",
+    "speed": "Speed",
+    "altitude": "Altitude",
+    "distance": "Distance",
+    "play": "Play",
+    "pause": "Pause",
+    "restart": "Restart",
+    "focusRocket": "Track vehicle",
+    "focusOverview": "Trajectory overview",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
+    }
 }

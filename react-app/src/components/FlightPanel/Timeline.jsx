@@ -1,61 +1,110 @@
-function Metric({ label, value, unit }) {
-  return (
-    <span>
-      {label}:{" "}
-      <span className="highlight">
-        {value}
-        {unit ? ` ${unit}` : ""}
-      </span>
-    </span>
-  );
-}
+import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { Play, Pause, RotateCcw } from "lucide-react";
+import { useFlightContext } from "../../context/FlightContext";
+import "./FlightPanel.css";
 
-function Timeline({ trajectory, timeIndex, setTimeIndex, isPlaying, setIsPlaying }) {
-  if (!trajectory || trajectory.length === 0) return null;
+function Timeline() {
+  const { data, timeIndex, setTimeIndex, isPlaying, setIsPlaying } =
+    useFlightContext();
+  const { t } = useTranslation();
 
-  const currentPoint = trajectory[timeIndex];
-  const [x, y, z] = currentPoint.pos;
-  const isAtEnd = timeIndex >= trajectory.length - 1;
-
-  // Calculate straight-line distance from origin (0, 0, 0)
-  const displacement = Math.sqrt(x ** 2 + y ** 2 + z ** 2);
-
-  const handlePlayPause = () => {
-    if (!isPlaying && isAtEnd) {
-      setTimeIndex(0);
+  // Auto-play logic
+  useEffect(() => {
+    let timer;
+    if (isPlaying && data?.length && timeIndex < data.length - 1) {
+      timer = setInterval(() => {
+        setTimeIndex((prevIndex) => {
+          if (prevIndex >= data.length - 2) {
+            setIsPlaying(false); // Stop at the end
+            return data.length - 1;
+          }
+          return prevIndex + 1;
+        });
+      }, 50); // Playback speed (50ms = 20 points per second)
     }
-    setIsPlaying(!isPlaying);
-  };
 
-  const handleSliderChange = (e) => {
-    setTimeIndex(parseInt(e.target.value, 10));
-    setIsPlaying(false);
-  };
+    return () => clearInterval(timer);
+  }, [isPlaying, data, timeIndex, setTimeIndex, setIsPlaying]);
+
+  if (!data?.length) return null;
+
+  const currentPoint = data[timeIndex];
+  const totalPoints = data.length;
+
+  function handleSliderChange(e) {
+    setTimeIndex(Number(e.target.value));
+    setIsPlaying(false); // Pause if the user manually drags the slider
+  }
 
   return (
-    <div className="timeline-container">
-      <button className="play-button" onClick={handlePlayPause}>
-        {isPlaying ? "PAUSE" : "PLAY"}
-      </button>
+    <>
+      <div className="player-controls">
+        <button
+          className="control-btn play-pause-btn"
+          onClick={() => setIsPlaying(!isPlaying)}
+          title={isPlaying ? t("flightPanel.pause") : t("flightPanel.play")}
+        >
+          {isPlaying ? (
+            <Pause size={20} fill="currentColor" />
+          ) : (
+            <Play size={20} fill="currentColor" className="play-icon-offset" />
+          )}
+        </button>
+
+        <button
+          className="control-btn reset-btn"
+          onClick={() => {
+            setTimeIndex(0);
+            setIsPlaying(false);
+          }}
+          title={t("flightPanel.restart")}
+        >
+          <RotateCcw size={18} />
+        </button>
+      </div>
 
       <div className="slider-wrapper">
         <input
           type="range"
-          className="time-slider"
           min="0"
-          max={trajectory.length - 1}
+          max={totalPoints - 1}
           value={timeIndex}
           onChange={handleSliderChange}
+          className="timeline-slider"
         />
+
         <div className="time-info">
-          <Metric label="Time" value={`T+${currentPoint.t.toFixed(1)}`} unit="s" />
-          <Metric label="Speed" value={currentPoint.vel.toFixed(1)} unit="m/s" />
-          <Metric label="Alt" value={z.toFixed(1)} unit="m" />
-          <Metric label="Path" value={currentPoint.distance.toFixed(1)} unit="m" />
-          <Metric label="Displacement" value={displacement.toFixed(1)} unit="m" />
+          <span>
+            {t("flightPanel.time")}:{" "}
+            <span className="highlight">
+              T+{currentPoint.t.toFixed(1)}
+              {t("units.seconds")}
+            </span>
+          </span>
+          <span>
+            {t("flightPanel.speed")}:{" "}
+            <span className="highlight">
+              {currentPoint.vel.toFixed(1)} {t("units.meters")}/
+              {t("units.seconds")}
+            </span>
+          </span>
+          <span>
+            {t("flightPanel.altitude")}:{" "}
+            <span className="highlight">
+              {currentPoint.pos[2].toFixed(1)} {t("units.meters")}
+            </span>
+          </span>
+          <span>
+            {t("flightPanel.distance")}:{" "}
+            <span className="highlight">
+              {(currentPoint.distance / 1000).toFixed(2)}{" "}
+              {t("units.kilometers")}
+            </span>
+          </span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

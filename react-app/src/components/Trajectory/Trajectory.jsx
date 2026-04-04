@@ -1,58 +1,46 @@
-import React, { useMemo } from 'react';
-import { Line } from '@react-three/drei';
-import * as THREE from 'three';
+import { useMemo } from "react";
+import { Line } from "@react-three/drei";
+import * as THREE from "three";
 
-import './Trajectory.css';
-
-function Trajectory ({ flightPoints }) {
-  // Use useMemo to avoid recalculating math on every render
+function Trajectory({ trajectory }) {
   const { points, colors } = useMemo(() => {
-    if (!flightPoints || flightPoints.length === 0) {
-      return { points: [], colors: [] };
-    }
+    if (!trajectory?.length) return { points: [], colors: [] };
+
+    // Find the maximum velocity to correctly set up the gradient
+    const maxVel = trajectory.reduce((max, p) => Math.max(max, p.vel), 0) || 1;
 
     const pts = [];
     const cols = [];
 
-    // Find max speed to build a relative scale
-    const maxVel = Math.max(...flightPoints.map(p => p.vel));
-    // Protect against division by zero when speed is constant/zero
-    const safeMaxVel = maxVel > 0 ? maxVel : 1; 
+    const colorSlow = new THREE.Color("#00d1ff"); // Blue (slow)
+    const colorFast = new THREE.Color("#ff3b30"); // Red (max speed)
 
-    flightPoints.forEach(p => {
-      // 1. Build point coordinates (swap Y and Z for scene orientation)
-      pts.push(new THREE.Vector3(p.pos[0], p.pos[2], -p.pos[1]));
+    trajectory.forEach((p) => {
+      const [x, y, z] = p.pos;
+      pts.push(new THREE.Vector3(x, z, -y));
 
-      // 2. Compute color based on speed
-      const speedRatio = p.vel / safeMaxVel; // Value in range 0.0..1.0
-      
-      const color = new THREE.Color();
-      
-      // Use HSL color model (Hue, Saturation, Lightness).
-      // Hue 0.7 is blue (slow), 0.0 is red (max speed).
-      // 0.7 * (1 - speedRatio) creates a smooth blue -> red gradient.
-      color.setHSL(0.7 * (1 - speedRatio), 1, 0.5);
-      
-      // <Line> from @react-three/drei expects colors as [[r, g, b], ...]
-      cols.push([color.r, color.g, color.b]);
+      // Determine the color for the current point based on speed
+      const speedRatio = p.vel / maxVel;
+      const pointColor = colorSlow.clone().lerp(colorFast, speedRatio);
+
+      // Drei Line accepts an array of colors in [r, g, b] format
+      cols.push([pointColor.r, pointColor.g, pointColor.b]);
     });
 
     return { points: pts, colors: cols };
-  }, [flightPoints]);
+  }, [trajectory]);
 
-  if (points.length === 0) return null;
+  if (points.length < 2) return null;
 
   return (
-    <group>
-      <Line
-        points={points}
-        vertexColors={colors} // Apply per-point color array
-        lineWidth={4}         // Slightly thicker line for better gradient visibility
-        transparent={true}
-        opacity={0.9}
-      />
-    </group>
+    <Line
+      points={points}
+      vertexColors={colors} // Enable multicolored line
+      lineWidth={4} // Line thickness
+      transparent={true}
+      opacity={0.9}
+    />
   );
-};
+}
 
 export default Trajectory;
