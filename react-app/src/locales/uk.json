@@ -14,5 +14,11 @@
     "maxSpeed": "Макс. швидкість (Трапецеїдальна)",
     "maxAcceleration": "Макс. прискорення",
     "flightDuration": "Тривалість польоту"
+  },
+  "units": {
+    "meters": "м",
+    "kilometers": "км",
+    "seconds": "с",
+    "minutes": "хв"
   }
 }

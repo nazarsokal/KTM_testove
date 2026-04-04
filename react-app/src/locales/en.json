@@ -14,5 +14,11 @@
     "maxSpeed": "Max Speed (Trapezoidal)",
     "maxAcceleration": "Max Acceleration",
     "flightDuration": "Flight Duration"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "seconds": "s",
+    "minutes": "min"
   }
 }
