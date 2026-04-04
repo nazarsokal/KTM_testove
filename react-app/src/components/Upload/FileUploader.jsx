@@ -1,18 +1,20 @@
 import { useRef } from 'react';
 import { Upload, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import './FileUploader.css';
 import { useFlightContext } from '../../context/FlightContext';
 
 const FileUploader = () => {
     const fileInputRef = useRef(null);
     const { uploadFile, loading } = useFlightContext();
+    const { t } = useTranslation();
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
 
         if (!file.name.endsWith('.bin') && !file.name.endsWith('.BIN')) {
-            alert("Будь ласка, виберіть бінарний лог-файл (.bin)");
+            alert(t('upload.alertWrongFormat'));
             return;
         }
 
@@ -40,7 +42,7 @@ const FileUploader = () => {
                 ) : (
                     <Upload size={20} className="btn-icon" />
                 )}
-                <span>{loading ? 'Processing...' : 'Upload Log File (.bin)'}</span>
+                <span>{loading ? t('upload.btnProcessing') : t('upload.btnSelect')}</span>
             </button>
         </div>
     );
