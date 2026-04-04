@@ -19,8 +19,21 @@ public class HomeController : ControllerBase
     [Route("/file/load")]
     public async Task<IActionResult> LoadFile(IFormFile file)
     {
-        var result = await _parsingService.Parse(file);
-        return Content(result, "application/json");
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("Файл не вибрано або він порожній.");
+        }
+
+        try
+        {
+            var result = await _parsingService.Parse(file);
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 
     [HttpGet("ai/result/{result}")]
