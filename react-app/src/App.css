@@ -263,3 +263,27 @@ body {
     "button button";
   grid-template-columns: 1fr auto;
 }
+
+.clear-data-btn {
+    grid-area: button;
+    justify-self: end;
+    align-self: center;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-data-btn:hover {
+    color: #ff7b72; /* М'який червоний колір */
+    border-color: #ff7b72;
+    background: rgba(255, 123, 114, 0.1); /* Легке червоне підсвічування */
+}
