@@ -15,7 +15,7 @@ const AIAssistant = () => {
                         <p className="ai-subtitle">Automated anomaly detection & insights</p>
                     </div>
                 </div>
-                <div className="ai-badge">0 Events</div>
+                {/*<div className="ai-badge">0 Events</div>*/}
             </div>
 
             <div className="ai-content-placeholder">
