@@ -24,10 +24,10 @@ public class HomeController : ControllerBase
         return Content(result, "application/json");
     }
 
-    [HttpPost("ai/result/")]
-    public async Task<IActionResult> GetFeedback([FromBody] AiFeedbackRequest request)
+    [HttpPost("ai/result/{language}")]
+    public async Task<IActionResult> GetFeedback([FromBody] AiFeedbackRequest request, string language = "English")
     {
-        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(request);
+        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(request, language);
         return Ok(aiResult);
     }
 }

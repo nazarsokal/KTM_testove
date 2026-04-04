@@ -17,7 +17,7 @@ public class AiFeedbackService : IAiFeedbackService
         _httpClient = httpClient;
     }
     
-    public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request)
+    public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request, string language = "English")
     {
         using var client = new HttpClient();
 
@@ -47,7 +47,9 @@ public class AiFeedbackService : IAiFeedbackService
                         {
                             text = $@"
                             You are an expert UAV / rocket flight analysis system.
-
+                            
+                            **IMPORTANT:** Respond **exclusively in {language}**.
+                            
                             You MUST analyze ALL provided data sources:
                             - summary: aggregated flight metrics
                             - events: key flight milestones
