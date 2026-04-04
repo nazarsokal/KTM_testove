@@ -1,8 +1,7 @@
-namespace KTM_testove.Contracts.Response;
-
+﻿namespace KTM_testove.Contracts.Response;
 using System.Text.Json.Serialization;
-
-public class SummaryResponse
+using System.Collections.Generic;
+public class SummaryContract
 {
     [JsonPropertyName("max_vertical_speed")]
     public double MaxVerticalSpeed { get; set; }

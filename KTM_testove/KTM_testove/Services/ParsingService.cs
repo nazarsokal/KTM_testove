@@ -32,7 +32,7 @@ public class ParsingService : IParsingService
         string scriptPath = Path.Combine(wwwrootPath, "flight_analysis.py");
         var startInfo = new ProcessStartInfo
         {
-            FileName = "python",
+            FileName = "python3",
             // Використовуємо лапки для шляхів, щоб уникнути помилок з пробілами
             Arguments = $"\"{scriptPath}\" \"{tempPath}\"",
             UseShellExecute = false,
