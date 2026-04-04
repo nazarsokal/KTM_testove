@@ -13,7 +13,7 @@ else:
 clean_path = filename.replace('file:///', '').replace('file:', '')
 
 search_candidates = [
-    clean_path,                              
+    clean_path,                                      
     os.path.join('logs', clean_path),       
     clean_path + ".log",                      
     os.path.join('logs', clean_path + ".log") 
@@ -190,7 +190,12 @@ for i in range(len(df_flight)):
             total_dist += np.sqrt(d2d**2 + (row['Alt'] - prev_row['Alt'])**2)
         
         idx_imu = np.abs(df_imu['TimeUS'] - row['TimeUS']).argmin() if not df_imu.empty else 0
-        v_val = float(df_imu['vel_raw'].iloc[idx_imu]) if not df_imu.empty else np.sqrt(h_spd**2 + v_spd**2)
+
+        if takeoff_event is None:
+            v_val = 0.0
+        else:
+            v_val = float(df_imu['vel_raw'].iloc[idx_imu]) if not df_imu.empty else np.sqrt(h_spd**2 + v_spd**2)
+            
         last_pos = (x, y, z)
     else:
         x, y, z = last_pos
@@ -198,15 +203,15 @@ for i in range(len(df_flight)):
 
     trajectory.append({
         "t": t_rel,
-        "pos": [round(float(x), 2), round(float(y), 2), round(float(cur_z), 2)],
+        "pos": [round(float(x), 2), round(float(y), 2), round(float(z), 2)],
         "vel": round(float(abs(v_val)), 2),
-
+        "distance": round(float(total_dist), 2), 
         "att": [
             round(float(np.radians(row.get('Roll', 0))), 4), 
             round(float(np.radians(row.get('Pitch', 0))), 4), 
             round(float(np.radians(row.get('Yaw', 0))), 4)
         ]
-        })
+    })
 
 events = []
 if takeoff_event: events.append(takeoff_event)
