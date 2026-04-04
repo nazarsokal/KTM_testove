@@ -1,3 +1,4 @@
+using KTM_testove.Contracts.Request;
 using KTM_testove.Services.ServiceAbstractions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,10 +24,10 @@ public class HomeController : ControllerBase
         return Content(result, "application/json");
     }
 
-    [HttpGet("ai/result/{result}")]
-    public async Task<IActionResult> GetFeedback(string result)
+    [HttpPost("ai/result/")]
+    public async Task<IActionResult> GetFeedback([FromBody] AiFeedbackRequest request)
     {
-        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(result);
+        var aiResult = await _aiiFeedbackService.GetFeedbackAsync(request);
         return Ok(aiResult);
     }
 }

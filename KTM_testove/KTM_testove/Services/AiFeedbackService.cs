@@ -1,4 +1,5 @@
 using System.Text;
+using KTM_testove.Contracts.Request;
 using KTM_testove.DTOs;
 using KTM_testove.Services.ServiceAbstractions;
 using Newtonsoft.Json;
@@ -9,112 +10,153 @@ namespace KTM_testove.Services;
 public class AiFeedbackService : IAiFeedbackService
 {
     private readonly HttpClient _httpClient;
-    private const string ApiKey = "AIzaSyAEGATSkUTv5LSP0G2IFhGqlrw9uQdLikA";
+    private const string ApiKey = "AIzaSyCzVZMK0t5O9sxA_g1jbWXGhgo9I6Unyb8";
 
     public AiFeedbackService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
     
-    public async Task<AiAnalysisDto> GetFeedbackAsync(string parameters)
-{
-    using var client = new HttpClient();
-
-    // Використовуємо API key у URL
-    var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={ApiKey}";
-
-    // Правильна структура запиту для Gemini 2.5 Flash
-    var body = new
+    public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request)
     {
-        contents = new[]
+        using var client = new HttpClient();
+
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={ApiKey}";
+        
+        var pointsSample = request.Points
+            .Take(20)
+            .ToList();
+
+        var structuredData = new
         {
-            new
+            summary = request.SummaryRequest,
+            events = request.Events,
+            anomalies = request.Anomalies,
+            points = pointsSample
+        };
+
+        var body = new
+        {
+            contents = new[]
             {
-                parts = new[]
+                new
                 {
-                    new
+                    parts = new[]
                     {
-                        text = $@"
-You are an expert UAV (drone) flight analysis system.
+                        new
+                        {
+                            text = $@"
+                            You are an expert UAV / rocket flight analysis system.
 
-Analyze the following drone flight metrics ONLY based on the data provided. Follow these rules:
-- Do NOT invent data
-- Do NOT add assumptions
-- Be precise and technical
-- If no issues, explicitly state flight is stable
+                            You MUST analyze ALL provided data sources:
+                            - summary: aggregated flight metrics
+                            - events: key flight milestones
+                            - anomalies: pre-detected anomalies (high priority)
+                            - points: raw telemetry (time series)
 
-INPUT DATA:
-{parameters}
+                            -------------------------------------
+                            IMPORTANT DOMAIN CONTEXT:
 
-ANALYSIS INSTRUCTIONS:
-1. Evaluate flight performance
-2. Identify abnormal or unsafe values:
-   - Very high acceleration (>30 m/s^2)
-   - Sudden vertical changes
-   - Unstable or inconsistent speeds
-3. Assess flight stability
-4. Determine risk level (LOW / MEDIUM / HIGH)
+                            Coordinate system:
+                            - Position is in a LOCAL coordinate system relative to launch point
+                            - Z (altitude) is RELATIVE, not absolute above sea level
+                            - Negative altitude AFTER landing can be valid and should NOT be treated as a critical anomaly by default
 
-OUTPUT FORMAT (STRICT JSON, NO MARKDOWN):
+                            Flight phases:
+                            - Takeoff → ascent → peak altitude → descent → landing → post-landing data
+                            - Velocity dropping to 0 AFTER landing is NORMAL behavior
 
-{{
-  ""feedback"": ""Concise technical summary of the flight"",
-  ""details"": [
-    ""List of detected issues or confirmations of stability""
-  ],
-  ""riskLevel"": ""LOW | MEDIUM | HIGH""
-}}"
+                            -------------------------------------
+                            STRICT RULES:
+                            - Use ONLY provided data
+                            - DO NOT invent values
+                            - DO NOT assume crashes unless clearly indicated
+                            - Distinguish between REAL anomalies and EXPECTED behavior
+                            - Prioritize: anomalies > events > summary > raw points
+
+                            -------------------------------------
+                            ANALYSIS INSTRUCTIONS:
+
+                            1. Flight Performance:
+                               - Evaluate speeds, acceleration, altitude profile
+                               - Comment on efficiency and consistency
+
+                            2. Stability Analysis:
+                               - Analyze trajectory smoothness
+                               - Detect oscillations or sudden attitude changes
+                               - Validate using telemetry points
+
+                            3. Safety Assessment:
+                               - Use anomalies list FIRST
+                               - Correlate with events
+                               - Ignore expected post-landing behavior
+
+                            4. Risk Classification:
+                               - HIGH → loss of control, extreme values, critical anomalies
+                               - MEDIUM → noticeable instability or suspicious behavior
+                               - LOW → stable and nominal flight
+
+                            -------------------------------------
+                            INPUT DATA (JSON):
+                            {JsonConvert.SerializeObject(structuredData, Formatting.Indented)}
+
+                            -------------------------------------
+                            OUTPUT FORMAT (STRICT JSON ONLY, NO MARKDOWN):
+
+                            {{
+                              ""feedback"": ""A detailed technical summary (4-6 sentences) describing flight phases, performance, stability, and overall behavior"",
+                              ""details"": [
+                                ""List of real issues OR confirmation of stable behavior"",
+                                ""Avoid false positives (e.g., velocity=0 after landing)""
+                              ],
+                              ""riskLevel"": ""LOW | MEDIUM | HIGH""
+                            }}
+                            "
+                        }
                     }
                 }
             }
-        }
-    };
-
-    var response = await client.PostAsync(
-        url,
-        new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
-    );
-
-    var result = await response.Content.ReadAsStringAsync();
-
-    // Перевірка статусу
-    if (!response.IsSuccessStatusCode)
-        throw new Exception($"AI API returned error {response.StatusCode}: {result}");
-
-    // Логування для дебагу
-    Console.WriteLine("AI raw response: " + result);
-
-    JObject json;
-    try
-    {
-        json = JObject.Parse(result);
-    }
-    catch (JsonException)
-    {
-        throw new Exception("AI response is not valid JSON: " + result);
-    }
-
-    // Отримуємо текст відповіді
-    var text = json["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString()
-               ?? throw new Exception("Empty AI response: " + result);
-
-    // Чистимо можливі markdown обгортки
-    text = text.Replace("```json", "").Replace("```", "").Trim();
-
-    try
-    {
-        // Десеріалізуємо у AiAnalysisDto
-        return JsonConvert.DeserializeObject<AiAnalysisDto>(text)
-               ?? new AiAnalysisDto { Feedback = text, RiskLevel = "UNKNOWN" };
-    }
-    catch (JsonException)
-    {
-        // Якщо JSON некоректний, повертаємо текст з RiskLevel = UNKNOWN
-        return new AiAnalysisDto
-        {
-            Feedback = text,
-            RiskLevel = "UNKNOWN"
         };
+
+        var response = await client.PostAsync(
+            url,
+            new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
+        );
+
+        var result = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"AI API returned error {response.StatusCode}: {result}");
+
+        Console.WriteLine("AI raw response: " + result);
+
+        JObject json;
+        try
+        {
+            json = JObject.Parse(result);
+        }
+        catch (JsonException)
+        {
+            throw new Exception("AI response is not valid JSON: " + result);
+        }
+
+        var text = json["candidates"]?[0]?["content"]?["parts"]?[0]?["text"]?.ToString()
+                   ?? throw new Exception("Empty AI response: " + result);
+
+        text = text.Replace("```json", "").Replace("```", "").Trim();
+
+        try
+        {
+            return JsonConvert.DeserializeObject<AiAnalysisDto>(text)
+                   ?? new AiAnalysisDto { Feedback = text, RiskLevel = "UNKNOWN" };
+        }
+        catch (JsonException)
+        {
+            return new AiAnalysisDto
+            {
+                Feedback = text,
+                RiskLevel = "UNKNOWN"
+            };
+        }
     }
-}
 }
