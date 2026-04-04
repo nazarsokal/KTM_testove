@@ -209,12 +209,14 @@ body {
 .dashboard-header {
   padding: 40px 0;
   border-bottom: 1px solid #30363d;
+  margin: 0 20px;
 }
 
 .dashboard-header h1 {
   margin: 0;
   color: #fff;
   font-size: 24px;
+  justify-self: left;
 }
 
 .subtitle {
@@ -252,4 +254,41 @@ body {
   color: #484f58;
   border: 1px solid #21262d;
   border-radius: 8px;
+}
+
+.header-content {
+  display: grid;
+  grid-template-areas:
+    "h1     lang  " 
+    "button button";
+  grid-template-columns: 1fr auto;
+}
+
+.clear-data-btn {
+    grid-area: button;
+    justify-self: end;
+    align-self: center;
+    background: transparent;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.clear-data-btn:hover {
+    color: #ff7b72; /* М'який червоний колір */
+    border-color: #ff7b72;
+    background: rgba(255, 123, 114, 0.1); /* Легке червоне підсвічування */
+}
+
+.flight-visuals-section {
+    width: calc(100% - 40px);
+    margin: auto;
 }

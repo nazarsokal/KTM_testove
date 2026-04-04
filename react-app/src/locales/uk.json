@@ -1,0 +1,37 @@
+{
+  "app": {
+    "title": "Система аналізу польотної телеметрії",
+    "clearData": "Очистити дані",
+    "error": "Помилка"
+  },
+  "upload": {
+    "btnSelect": "Завантажити лог (.bin)",
+    "btnProcessing": "Обробка...",
+    "alertWrongFormat": "Будь ласка, виберіть бінарний лог-файл (.bin)"
+  },
+  "metrics": {
+    "totalDistance": "Загальна відстань (Гаверсинус)",
+    "maxSpeed": "Макс. швидкість (Трапецеїдальна)",
+    "maxAcceleration": "Макс. прискорення",
+    "flightDuration": "Тривалість польоту"
+  },
+  "units": {
+    "meters": "м",
+    "kilometers": "км",
+    "seconds": "с",
+    "minutes": "хв"
+  },
+  "flightPanel": {
+    "time": "Час польоту",
+    "speed": "Швидкість",
+    "altitude": "Висота",
+    "distance": "Пройдено",
+    "play": "Відтворити",
+    "pause": "Пауза",
+    "restart": "На початок",
+    "focusRocket": "Слідкувати за апаратом",
+    "focusOverview": "Огляд всієї траєкторії",
+    "fullscreen": "На весь екран",
+    "exitFullscreen": "Згорнути"
+    }
+}

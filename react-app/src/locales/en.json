@@ -1,0 +1,37 @@
+{
+  "app": {
+    "title": "System for Flight Telemetry Analysis",
+    "clearData": "Clear Data",
+    "error": "Error"
+  },
+  "upload": {
+    "btnSelect": "Upload Log File (.bin)",
+    "btnProcessing": "Processing...",
+    "alertWrongFormat": "Please select a binary log file (.bin)"
+  },
+  "metrics": {
+    "totalDistance": "Total Distance (Haversine)",
+    "maxSpeed": "Max Speed (Trapezoidal)",
+    "maxAcceleration": "Max Acceleration",
+    "flightDuration": "Flight Duration"
+  },
+  "units": {
+    "meters": "m",
+    "kilometers": "km",
+    "seconds": "s",
+    "minutes": "min"
+  },
+  "flightPanel": {
+    "time": "Flight Time",
+    "speed": "Speed",
+    "altitude": "Altitude",
+    "distance": "Distance",
+    "play": "Play",
+    "pause": "Pause",
+    "restart": "Restart",
+    "focusRocket": "Track vehicle",
+    "focusOverview": "Trajectory overview",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
+    }
+}
