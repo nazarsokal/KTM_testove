@@ -10,11 +10,13 @@ namespace KTM_testove.Services;
 public class AiFeedbackService : IAiFeedbackService
 {
     private readonly HttpClient _httpClient;
-    private const string ApiKey = "AIzaSyCzVZMK0t5O9sxA_g1jbWXGhgo9I6Unyb8";
+    private readonly string ApiKey;
 
-    public AiFeedbackService(HttpClient httpClient)
+    public AiFeedbackService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        ApiKey = configuration["GoogleApi:ApiKey"] 
+                  ?? throw new Exception("API Key не знайдено!");
     }
     
     public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request, string language = "English")

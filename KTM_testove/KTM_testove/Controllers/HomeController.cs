@@ -9,7 +9,6 @@ public class HomeController : ControllerBase
 {
     private readonly IParsingService _parsingService;
     private readonly IAiFeedbackService _aiiFeedbackService;
-
     public HomeController(IParsingService parsingService, IAiFeedbackService aiiFeedbackService)
     {
         _parsingService = parsingService;
