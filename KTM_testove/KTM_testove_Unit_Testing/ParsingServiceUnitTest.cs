@@ -15,7 +15,7 @@ public class ParsingServiceUnitTest
     public async Task Parse_ValidBinFile_ReturnsCorrectData()
     {
         // 1. Arrange: Вказуємо шлях до тестового бінарного файлу логу
-        var binFilePath = @"C:\Users\PC\Desktop\Hachathon\KTM_testove\KTM_testove\KTM_testove\wwwroot\logs\00000019.BIN";
+        var binFilePath = @"/Users/asokalch/Documents/GitHub/KTM_testove/KTM_testove/KTM_testove/wwwroot/logs/00000019.BIN";
         Assert.True(File.Exists(binFilePath), $"Тестовий файл не знайдено за шляхом: {binFilePath}");
 
         // Створюємо IFormFile
@@ -30,7 +30,7 @@ public class ParsingServiceUnitTest
         
         // --- ВИПРАВЛЕННЯ 1 ---
         // Вказуємо справжній шлях до wwwroot, щоб ParsingService зміг знайти flight_analysis.py
-        var realWwwrootPath = @"C:\Users\PC\Desktop\Hachathon\KTM_testove\KTM_testove\KTM_testove\wwwroot";
+        var realWwwrootPath = @"/Users/asokalch/Documents/GitHub/KTM_testove/KTM_testove/KTM_testove/wwwroot";
         mockEnv.Setup(env => env.WebRootPath).Returns(realWwwrootPath);
 
         // --- ВИПРАВЛЕННЯ 2 ---
