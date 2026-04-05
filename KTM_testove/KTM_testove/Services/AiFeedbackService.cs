@@ -16,126 +16,146 @@ public class AiFeedbackService : IAiFeedbackService
     public AiFeedbackService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        ApiKey  = Environment.GetEnvironmentVariable("NVIDIA_API_KEY") ?? throw new Exception("API Key не знайдено!");
+        ApiKey  = Environment.GetEnvironmentVariable("NVIDIA_API_KEY_GEMINI") ?? throw new Exception("API Key не знайдено!");
     }
     
     public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request, string language = "English")
+{
+    _httpClient.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", ApiKey);
+
+    var url = "https://integrate.api.nvidia.com/v1/chat/completions";
+
+    var pointsSample = request.Points
+        .Take(20)
+        .ToList();
+
+    var structuredData = new
     {
-        using var client = new HttpClient();
+        summary = request.SummaryRequest,
+        events = request.Events,
+        points = pointsSample
+    };
 
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", ApiKey);
+    var prompt = $@"
+You are an expert UAV / rocket flight analysis system.
 
-        var url = "https://integrate.api.nvidia.com/v1/chat/completions";
+Respond ONLY in {language}.
 
-        var pointsSample = request.Points
-            .Take(20)
-            .ToList();
+STRICT RULES:
+- RETURN ONLY VALID JSON
+- NO markdown
+- NO ```json
+- NO explanations outside JSON
+- DO NOT hallucinate
+- USE ONLY PROVIDED DATA
 
-        var structuredData = new
+Coordinate system:
+- Z is relative altitude
+- Negative altitude AFTER landing is NORMAL
+
+Flight phases:
+Takeoff → ascent → peak → descent → landing → post-landing
+
+-------------------------------------
+
+Analyze:
+1. Performance (speed, acceleration, altitude)
+2. Stability (trajectory, oscillations)
+3. Safety (based on anomalies FIRST)
+
+-------------------------------------
+
+INPUT DATA:
+{JsonConvert.SerializeObject(structuredData, Formatting.None)}
+
+-------------------------------------
+
+OUTPUT FORMAT:
+
+{{
+  ""feedback"": ""4-6 sentence technical summary"",
+  ""details"": [""bullet points""],
+  ""riskLevel"": ""LOW | MEDIUM | HIGH""
+}}
+";
+
+    var body = new
+    {
+        model = "google/gemma-3n-e2b-it",
+        messages = new[]
         {
-            summary = request.SummaryRequest,
-            events = request.Events,
-            points = pointsSample
-        };
+            new { role = "system", content = "You are a strict flight analysis AI. Return ONLY valid JSON." },
+            new { role = "user", content = prompt }
+        },
+        temperature = 0.2,
+        top_p = 0.7,
+        max_tokens = 512,
+        stream = true
+    };
 
-        var prompt = $@"
-    You are an expert UAV / rocket flight analysis system.
+    using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+    requestMessage.Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
+    requestMessage.Headers.Accept.Clear();
+    requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
-    Respond ONLY in {language}.
+    using var response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+    if (!response.IsSuccessStatusCode)
+        throw new Exception($"AI API returned error {response.StatusCode}");
 
-    IMPORTANT:
-    - Use ONLY provided data
-    - DO NOT hallucinate
-    - Distinguish anomalies from expected behavior
+    var textBuffer = new StringBuilder();
 
-    Coordinate system:
-    - Z is relative altitude
-    - Negative altitude AFTER landing is NORMAL
+    // Читаємо SSE поток
+    await using var stream = await response.Content.ReadAsStreamAsync();
+    using var reader = new StreamReader(stream);
 
-    Flight phases:
-    Takeoff → ascent → peak → descent → landing → post-landing
+    while (!reader.EndOfStream)
+    {
+        var line = await reader.ReadLineAsync();
+        if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data:"))
+            continue;
 
-    -------------------------------------
-
-    Analyze:
-    1. Performance (speed, acceleration, altitude)
-    2. Stability (trajectory, oscillations)
-    3. Safety (based on anomalies FIRST)
-
-    -------------------------------------
-
-    INPUT DATA:
-    {JsonConvert.SerializeObject(structuredData, Formatting.Indented)}
-
-    -------------------------------------
-
-    Return ONLY valid JSON:
-
-    {{
-      ""feedback"": ""4-6 sentence technical summary"",
-      ""details"": [""bullet points""],
-      ""riskLevel"": ""LOW | MEDIUM | HIGH""
-    }}
-    ";
-
-        var body = new
-        {
-            model = "nvidia/llama-3.3-nemotron-super-49b-v1.5",
-            messages = new[]
-            {
-                new { role = "system", content = "You are a strict flight analysis AI. Always return valid JSON." },
-                new { role = "user", content = prompt }
-            },
-            temperature = 0.3,
-            top_p = 0.9,
-            max_tokens = 2000,
-            stream = false
-        };
-
-        var response = await client.PostAsync(
-            url,
-            new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json")
-        );
-
-        var result = await response.Content.ReadAsStringAsync();
-
-        if (!response.IsSuccessStatusCode)
-            throw new Exception($"AI API returned error {response.StatusCode}: {result}");
-
-        Console.WriteLine("AI raw response: " + result);
-        
-        JObject json;
-        try
-        {
-            json = JObject.Parse(result);
-        }
-        catch (JsonException)
-        {
-            throw new Exception("AI response is not valid JSON: " + result);
-        }
-
-        var text = json["choices"]?[0]?["message"]?["content"]?.ToString();
-
-        if (string.IsNullOrWhiteSpace(text))
-            throw new Exception("Empty AI response: " + result);
-
-        text = text.Replace("```json", "")
-                   .Replace("```", "")
-                   .Trim();
+        var jsonPart = line.Substring("data:".Length).Trim();
+        if (jsonPart == "[DONE]") break;
 
         try
         {
-            return JsonConvert.DeserializeObject<AiAnalysisDto>(text)
-                   ?? new AiAnalysisDto { Feedback = text, RiskLevel = "UNKNOWN" };
+            var chunk = JObject.Parse(jsonPart);
+            var content = chunk["choices"]?[0]?["delta"]?["content"]?.ToString();
+            if (!string.IsNullOrEmpty(content))
+                textBuffer.Append(content);
         }
-        catch (JsonException)
+        catch
         {
-            return new AiAnalysisDto
-            {
-                Feedback = text,
-                RiskLevel = "UNKNOWN"
-            };
+            // Ігноруємо часткові фрагменти, які не є валідним JSON
         }
     }
+
+    var text = textBuffer.ToString().Trim();
+
+    // 🔥 fallback: якщо модель вернула текст + JSON
+    var jsonStart = text.IndexOf("{");
+    var jsonEnd = text.LastIndexOf("}");
+    if (jsonStart >= 0 && jsonEnd > jsonStart)
+        text = text.Substring(jsonStart, jsonEnd - jsonStart + 1);
+
+    try
+    {
+        return JsonConvert.DeserializeObject<AiAnalysisDto>(text)
+               ?? new AiAnalysisDto
+               {
+                   Feedback = text,
+                   RiskLevel = "UNKNOWN"
+               };
+    }
+    catch
+    {
+        return new AiAnalysisDto
+        {
+            Feedback = text,
+            RiskLevel = "UNKNOWN",
+            Details = new List<string> { "AI returned non-structured response" }
+        };
+    }
+}
 }
