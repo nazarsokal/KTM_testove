@@ -5,6 +5,7 @@ import FileUploader from "./components/Upload/FileUploader";
 import AIAssistant from "./components/AI/AIAssistant";
 import LanguageSwitcher from "./components/LanguageSwitcher/LanguageSwitcher";
 import FlightPanel from "./components/FlightPanel/FlightPanel";
+import WelcomeScreen from "./components/WelcomeScreen/WelcomeScreen";
 import "./App.css";
 import { Trash2 } from "lucide-react";
 
@@ -32,27 +33,28 @@ function App() {
 
       <main className="dashboard-main">
         {error && (
-          <div className="error-message" role="alert">
+          <div className="error-message">
             {t("app.error")}: {error}
           </div>
         )}
-
-        <section className="metrics-section">
-          <MetricsGrid />
-        </section>
+        
+        {!hasData && <WelcomeScreen />}
 
         {hasData && (
-          <section
-            className="flight-visuals-section"
-            style={{ marginTop: "20px" }}
-          >
-            <FlightPanel />
-          </section>
-        )}
+          <>
+            <section className="metrics-section">
+              <MetricsGrid />
+            </section>
 
-        <section className="ai-section" style={{ margin: "20px" }}>
-          <AIAssistant />
-        </section>
+            <section className="flight-visuals-section">
+              <FlightPanel />
+            </section>
+
+            <section className="ai-section" style={{ margin: "20px" }}>
+              <AIAssistant />
+            </section>
+          </>
+        )}
       </main>
     </>
   );
