@@ -7,7 +7,6 @@ import './AIAssistant.css';
 import { useTranslation } from 'react-i18next';
 import { useAIContext } from '../../context/AIContext';
 
-// Збільшено стандартне значення speed (з 10 на 30)
 const TypewriterText = ({ text, speed = 30, onComplete, delay = 0 }) => {
     const [displayedText, setDisplayedText] = useState("");
     const [started, setStarted] = useState(false);
@@ -129,22 +128,24 @@ const AIAssistant = () => {
                             </div>
                             <ChevronDown size={18} className="section-arrow" />
                         </div>
-                        {openSections.feedback && (
-                            <div className="section-content highlight-text feedback-bg">
-                                {loading ? (
-                                    <div className="ai-skeleton-text">
-                                        <div className="skeleton-line"></div>
-                                        <div className="skeleton-line" style={{ width: '60%' }}></div>
-                                    </div>
-                                ) : (
-                                    <TypewriterText 
-                                        text={aiAnalysis?.feedback} 
-                                        speed={30} // Встановлено повільнішу швидкість для відгуку
-                                        onComplete={handleFeedbackComplete} 
-                                    />
-                                )}
-                            </div>
-                        )}
+                        {/* Контент більше не видаляється з DOM, а просто ховається */}
+                        <div 
+                            className="section-content highlight-text feedback-bg"
+                            style={{ display: openSections.feedback ? undefined : 'none' }}
+                        >
+                            {loading ? (
+                                <div className="ai-skeleton-text">
+                                    <div className="skeleton-line"></div>
+                                    <div className="skeleton-line" style={{ width: '60%' }}></div>
+                                </div>
+                            ) : (
+                                <TypewriterText 
+                                    text={aiAnalysis?.feedback} 
+                                    speed={30}
+                                    onComplete={handleFeedbackComplete} 
+                                />
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -158,28 +159,29 @@ const AIAssistant = () => {
                             </div>
                             <ChevronDown size={18} className="section-arrow" />
                         </div>
-                        {openSections.details && (
-                            <div className="section-content highlight-text">
-                                <div className="details-stack">
-                                    {loading ? (
-                                        [1, 2].map(i => <div key={i} className="skeleton-row"><div className="skeleton-icon"></div><div className="skeleton-line" style={{width: '75%'}}></div></div>)
-                                    ) : (
-                                        aiAnalysis?.details?.map((item, idx) => (
-                                            idx <= visibleDetailsCount && (
-                                                <div key={idx} className="detail-row">
-                                                    {item.toLowerCase().includes('аномалія') ? <AlertTriangle size={14} color="#f59e0b" /> : <Info size={14} color="#3b82f6" />}
-                                                    <TypewriterText 
-                                                        text={item} 
-                                                        speed={25} // Збільшено з 8 до 25 для списку деталей
-                                                        onComplete={idx === visibleDetailsCount ? handleDetailComplete : null}
-                                                    />
-                                                </div>
-                                            )
-                                        ))
-                                    )}
-                                </div>
+                        <div 
+                            className="section-content highlight-text"
+                            style={{ display: openSections.details ? undefined : 'none' }}
+                        >
+                            <div className="details-stack">
+                                {loading ? (
+                                    [1, 2].map(i => <div key={i} className="skeleton-row"><div className="skeleton-icon"></div><div className="skeleton-line" style={{width: '75%'}}></div></div>)
+                                ) : (
+                                    aiAnalysis?.details?.map((item, idx) => (
+                                        idx <= visibleDetailsCount && (
+                                            <div key={idx} className="detail-row">
+                                                {item.toLowerCase().includes('аномалія') ? <AlertTriangle size={14} color="#f59e0b" /> : <Info size={14} color="#3b82f6" />}
+                                                <TypewriterText 
+                                                    text={item} 
+                                                    speed={25}
+                                                    onComplete={idx === visibleDetailsCount ? handleDetailComplete : null}
+                                                />
+                                            </div>
+                                        )
+                                    ))
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 )}
 
@@ -196,24 +198,25 @@ const AIAssistant = () => {
                             </div>
                             <ChevronDown size={18} className="section-arrow" />
                         </div>
-                        {openSections.risk && (
-                            <div className="section-content risk-content highlight-text">
-                                {loading ? (
-                                    <div className="skeleton-risk"><div className="skeleton-badge"></div></div>
-                                ) : (
-                                    <div className="animate-in">
-                                        <div className={`risk-indicator ${aiAnalysis?.riskLevel?.toLowerCase()}`}>
-                                            <strong>{t('aiAssistant.lvlName')}</strong> {t(`aiAssistant.riskState.${aiAnalysis?.riskLevel?.toLowerCase()}`)}
-                                        </div>
-                                        <TypewriterText 
-                                            text={aiAnalysis?.riskLevel === 'HIGH' ? t('aiAssistant.riskNotes.high') : aiAnalysis?.riskLevel === 'MEDIUM' ? t('aiAssistant.riskNotes.medium') : t('aiAssistant.riskNotes.low')} 
-                                            speed={35} // Збільшено з 15 до 35 для фінального висновку
-                                            onComplete={() => setRenderStep('finished')}
-                                        />
+                        <div 
+                            className="section-content risk-content highlight-text"
+                            style={{ display: openSections.risk ? undefined : 'none' }}
+                        >
+                            {loading ? (
+                                <div className="skeleton-risk"><div className="skeleton-badge"></div></div>
+                            ) : (
+                                <div className="animate-in">
+                                    <div className={`risk-indicator ${aiAnalysis?.riskLevel?.toLowerCase()}`}>
+                                        <strong>{t('aiAssistant.lvlName')}</strong> {t(`aiAssistant.riskState.${aiAnalysis?.riskLevel?.toLowerCase()}`)}
                                     </div>
-                                )}
-                            </div>
-                        )}
+                                    <TypewriterText 
+                                        text={aiAnalysis?.riskLevel === 'HIGH' ? t('aiAssistant.riskNotes.high') : aiAnalysis?.riskLevel === 'MEDIUM' ? t('aiAssistant.riskNotes.medium') : t('aiAssistant.riskNotes.low')} 
+                                        speed={35}
+                                        onComplete={() => setRenderStep('finished')}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

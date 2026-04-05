@@ -36,6 +36,7 @@
     },
   "aiAssistant": {
     "title": "AI Flight Assistant",
+    "statusAnalyzing": "Analyzing",
     "statusLive": "Live Analysis",
     "sections": {
       "feedback": "Flight Summary (Feedback)",
@@ -46,7 +47,7 @@
     "riskNotes": {
       "high": "CRITICAL: Serious anomalies detected. Further flights are prohibited until a full technical inspection!",
       "medium": "Requires attention from technical personnel before the next flight.",
-      "low": "Flight is within normal limits or requires critical inspection."
+      "low": "Flight is within normal limits"
     },
     "riskState": {
       "high": "HIGH",
