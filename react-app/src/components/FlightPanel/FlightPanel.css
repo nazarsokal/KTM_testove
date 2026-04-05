@@ -1,0 +1,257 @@
+.flight-panel-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+/* When fullscreen is enabled */
+.flight-panel-wrapper.is-fullscreen {
+  padding: 20px;
+  border-radius: 0;
+  border: none;
+  height: 100vh;
+  background: #0d1117;
+}
+
+.flight-panel-wrapper.is-fullscreen .scene-wrapper {
+  height: 100%; /* Scene takes all available space */
+  flex: 1;
+}
+
+.scene-wrapper {
+  height: 60vh;
+  min-height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background: #000000; /* Black background works best for the transparent grid */
+  border: 1px solid #30363d;
+}
+
+/* --- Camera control buttons --- */
+.camera-controls-overlay {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(22, 27, 34, 0.85);
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #30363d;
+  backdrop-filter: blur(4px);
+}
+
+.scene-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #8b949e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.scene-btn:hover {
+  background: #30363d;
+  color: #c9d1d9;
+}
+
+.scene-btn.active {
+  color: #00d1ff;
+  background: rgba(0, 209, 255, 0.1);
+}
+
+.scene-divider {
+  height: 1px;
+  background-color: #30363d;
+  margin: 2px 0;
+}
+
+/* --- Event markers on the 3D scene --- */
+.event-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+
+.event-dot {
+  /* Трохи зменшив саму крапку для акуратності */
+  width: 10px; 
+  height: 10px;
+  background: #f85149;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(248, 81, 73, 0.8);
+  z-index: 2;
+}
+
+.event-label {
+  position: absolute;
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid #f85149;
+  color: #fff;
+  
+  /* ЗМЕНШЕНІ ПАРАМЕТРИ ЛЕЙБЛА */
+  padding: 2px 6px; /* Було 4px 10px - тепер менше повітря навколо тексту */
+  border-radius: 4px; /* Менш круглі кути */
+  font-size: 10px; /* Було 12px - текст став компактнішим */
+  font-weight: 500; /* Було 600 - текст став тоншим і легшим */
+  
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); /* Зменшена тінь */
+  z-index: 1;
+}
+
+/* 4 позиції для алгоритму анти-накладання */
+/* Трохи зменшив відстань зсуву (з 15px до 12px), оскільки лейбли тепер менші */
+
+/* Top-Right (Вгору і Вправо) */
+.pos-tr { 
+  bottom: 50%; left: 50%; 
+  transform: translate(12px, -12px); 
+}
+
+/* Bottom-Right (Вниз і Вправо) */
+.pos-br { 
+  top: 50%; left: 50%; 
+  transform: translate(12px, 12px); 
+}
+
+/* Top-Left (Вгору і Вліво) */
+.pos-tl { 
+  bottom: 50%; right: 50%; 
+  transform: translate(-12px, -12px); 
+}
+
+/* Bottom-Left (Вниз і Вліво) */
+.pos-bl { 
+  top: 50%; right: 50%; 
+  transform: translate(-12px, 12px); 
+}
+
+/* --- Player (Timeline) --- */
+.timeline-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.player-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.control-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+
+.play-pause-btn {
+  background: linear-gradient(135deg, #00d1ff 0%, #0077ff 100%);
+  box-shadow: 0 4px 15px rgba(0, 209, 255, 0.3);
+}
+
+.play-pause-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 209, 255, 0.5);
+}
+
+.play-icon-offset {
+  margin-left: 3px;
+}
+
+.reset-btn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #8b949e;
+}
+
+.reset-btn:hover {
+  color: #c9d1d9;
+  border-color: #8b949e;
+}
+
+.slider-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #00d1ff;
+}
+
+.time-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.time-info .highlight {
+  color: #00d1ff;
+  font-weight: 700;
+}
+@media (max-width: 768px) {
+  .flight-panel-wrapper {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .scene-wrapper {
+    height: 45vh;
+    min-height: 300px;
+  }
+
+  .timeline-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .player-controls {
+    justify-content: center;
+  }
+
+  .time-info {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .time-info span {
+    width: 45%; 
+    font-size: 11px;
+  }}

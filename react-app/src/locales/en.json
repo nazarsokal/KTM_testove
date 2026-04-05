@@ -20,5 +20,50 @@
     "kilometers": "km",
     "seconds": "s",
     "minutes": "min"
+  },
+  "flightPanel": {
+    "time": "Flight Time",
+    "speed": "Speed",
+    "altitude": "Altitude",
+    "distance": "Distance",
+    "play": "Play",
+    "pause": "Pause",
+    "restart": "Restart",
+    "focusRocket": "Track vehicle",
+    "focusOverview": "Trajectory overview",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen"
+    },
+  "aiAssistant": {
+    "title": "AI Flight Assistant",
+    "statusAnalyzing": "Analyzing",
+    "statusLive": "Live Analysis",
+    "sections": {
+      "feedback": "Flight Summary (Feedback)",
+      "details": "Technical Analysis (Details)",
+      "risk": "Risk Assessment (Risk Level)"
+    },
+    "lvlName": "Current level:",
+    "riskNotes": {
+      "high": "CRITICAL: Serious anomalies detected. Further flights are prohibited until a full technical inspection!",
+      "medium": "Requires attention from technical personnel before the next flight.",
+      "low": "Flight is within normal limits"
+    },
+    "riskState": {
+      "high": "HIGH",
+      "medium" : "MEDIUM",
+      "low": "LOW"
+    }
+  },
+  "welcome": {
+    "title": "Welcome to Telemetry Analysis System",
+    "subtitle": "Upload your flight log (.bin) to get detailed analytics, 3D visualization, and insights from the AI assistant.",
+    "feature1Title": "Precise Metrics",
+    "feature1Desc": "Haversine distance calculation, max speed, and acceleration with noise filtering.",
+    "feature2Title": "3D Visualization",
+    "feature2Desc": "Interactive playback of the flight trajectory with accurate vehicle attitude in space.",
+    "feature3Title": "AI Analytics",
+    "feature3Desc": "Built-in assistant will analyze your flight and suggest improvements for your vehicle.",
+    "uploadHint": "Use the upload button to get started"
   }
 }

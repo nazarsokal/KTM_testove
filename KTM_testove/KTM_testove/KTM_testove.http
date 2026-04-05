@@ -1,0 +1,6 @@
+@KTM_testove_HostAddress = http://localhost:5208
+
+GET {{KTM_testove_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,14 +1,10 @@
 import React, { createContext, useContext, useState, useMemo } from 'react';
-
 const FlightContext = createContext();
 
 export function FlightProvider({ children }) {
-    // Data and loading states
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
-    // States for 3D player timeline
     const [timeIndex, setTimeIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -19,8 +15,6 @@ export function FlightProvider({ children }) {
         try {
             const formData = new FormData();
             formData.append('file', file);
-
-            // Use URL from environment variables
             const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5208';
             
             const response = await fetch(`${baseUrl}/file/load`, {
@@ -36,7 +30,7 @@ export function FlightProvider({ children }) {
             console.log("File uploaded successfully:", json);
             
             setData(json);
-            setTimeIndex(0); // Reset player state on new file
+            setTimeIndex(0); 
             setIsPlaying(false);
         } catch (err) {
             console.error("Upload error:", err);
@@ -54,7 +48,6 @@ export function FlightProvider({ children }) {
         setError(null);
     }
 
-    // Enrich trajectory (adds covered distance for 3D scene and metrics)
     const enrichedTrajectory = useMemo(() => {
         if (!data?.trajectory) return [];
         
@@ -78,7 +71,7 @@ export function FlightProvider({ children }) {
         data: enrichedTrajectory,
         summary: data?.summary,
         events: data?.events,
-        rawTelemetry: data, // Fallback in case original JSON is needed
+        rawTelemetry: data, 
         loading,
         error,
         timeIndex,
@@ -96,7 +89,6 @@ export function FlightProvider({ children }) {
     );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useFlightContext() {
     return useContext(FlightContext);
 }

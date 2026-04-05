@@ -1,0 +1,261 @@
+/* ГОЛОВНИЙ КОНТЕЙНЕР */
+.ai-assistant-container {
+    box-sizing: border-box;
+    width: 100%;
+    /*margin: 20px auto;*/
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 14px;
+    padding: 20px;
+    font-family: -apple-system, system-ui, sans-serif;
+    transition: all 0.3s ease;
+}
+
+/* ШАПКА ТА СТАТУС */
+.ai-main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #21262d;
+}
+
+.ai-title-group { display: flex; align-items: center; gap: 10px; }
+.ai-logo-box { 
+    background: rgba(97, 255, 140, 0.1); 
+    padding: 6px; 
+    border-radius: 8px; 
+    display: flex; 
+    align-items: center; 
+}
+.ai-main-header h3 { margin: 0; color: #f0f6fc; font-size: 16px; letter-spacing: 0.5px; }
+
+.ai-status-dot {
+    font-size: 11px;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-status-dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.ai-status-dot.is-live::before {
+    background: #3fb950;
+    box-shadow: 0 0 8px #3fb950;
+}
+
+.ai-status-dot.is-loading::before {
+    background: #61ff8c;
+    box-shadow: 0 0 12px #61ff8c;
+    animation: pulse-status 1.5s infinite;
+}
+
+/* СЕКЦІЇ ТА АНІМАЦІЯ ПОЯВИ */
+.ai-sections-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ai-collapsible-section {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.animate-section-in {
+    animation: sectionAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes sectionAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-collapsible-section.is-open {
+    border-color: #484f58;
+    background: #1c2128;
+}
+
+.section-trigger {
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.section-trigger:hover { background: rgba(255, 255, 255, 0.02); }
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #e6edf3;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.section-arrow { color: #484f58; transition: transform 0.3s; }
+.is-open .section-arrow { transform: rotate(180deg); color: #f0f6fc; }
+
+/* КОНТЕНТ СЕКЦІЙ */
+.section-content {
+    padding: 0 16px 16px 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* КЛЮЧОВИЙ ФІКС: Яскравий колір для всього тексту ШІ */
+.highlight-text,
+.typing-text,
+.feedback-bg p,
+.detail-row p {
+    color: #d1d5db !important; /* Світлий колір замість тьмяного сірого */
+    margin: 0;
+}
+
+.feedback-bg {
+    padding-left: 12px;
+    border-left: 2px solid #3b82f6;
+}
+
+/* ЕФЕКТ ДРУКУ ТА КУРСОР */
+.typewriter-container {
+    min-height: 1.6em;
+}
+
+.typing-text {
+    font-family: 'ui-monospace', 'SFMono-Regular', 'Cascadia Code', 'Segoe UI Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+}
+
+.typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background-color: #61ff8c;
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* СПИСКИ (DETAILS) */
+.details-stack { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+
+.detail-row { 
+    display: flex; 
+    gap: 10px; 
+    align-items: flex-start;
+    animation: fadeInSlide 0.4s ease forwards;
+}
+
+@keyframes fadeInSlide {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* СКЕЛЕТОНИ (ПІД ЧАС ЗАВАНТАЖЕННЯ) */
+.skeleton-line {
+    height: 14px;
+    background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.skeleton-icon {
+    width: 14px;
+    height: 14px;
+    background: #21262d;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.skeleton-badge {
+    width: 80px;
+    height: 24px;
+    background: #21262d;
+    border-radius: 6px;
+}
+
+/* РИЗИКИ */
+.risk-indicator {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.risk-indicator.high { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid rgba(248, 81, 73, 0.2); }
+.risk-indicator.medium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid #453024; }
+.risk-indicator.low { background: rgba(63, 185, 80, 0.1); color: #3fb950; border: 1px solid rgba(63, 185, 80, 0.2); }
+
+.risk-note { font-size: 12px; font-style: italic; color: #8b949e; margin-top: 8px; }
+
+/* УТИЛІТИ */
+@keyframes pulse-status {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin { animation: spin 1s linear infinite; }
+.icon-blue { color: #3b82f6; }
+.icon-green { color: #3fb950; }
+.icon-red { color: #f85149; }
+
+@media (max-width: 600px) {
+    .ai-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .ai-badge {
+        align-self: flex-start;
+    }
+
+    .ai-footer {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }}
