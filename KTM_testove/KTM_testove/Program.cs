@@ -28,7 +28,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IParsingService, ParsingService>();
 builder.Services.AddHttpClient<IAiFeedbackService, AiFeedbackService>();
 var app = builder.Build();
-app.UseCors("AllowAll");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -37,6 +37,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 
