@@ -6,7 +6,5 @@ public class AiFeedbackRequest
 
     public required List<string> Events { get; set; }
 
-    public required List<string> Anomalies { get; set; }
-
     public required List<DataPointRequest> Points { get; set; }
 }
