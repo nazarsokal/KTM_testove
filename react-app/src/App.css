@@ -12,13 +12,6 @@ body {
   font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* .dashboard-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  padding: 0 40px;
-} */
-
 .dashboard-header {
   padding: 40px 0;
   border-bottom: 1px solid #30363d;
@@ -104,4 +97,8 @@ body {
 .flight-visuals-section {
     width: calc(100% - 40px);
     margin: auto;
+}
+
+.error-message {
+  margin-top: 20px;
 }
