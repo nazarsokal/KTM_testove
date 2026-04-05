@@ -1,6 +1,6 @@
 .flight-panel-wrapper {
   box-sizing: border-box;
-  width: calc(100% - 40px);
+  width: 100%;
   margin: auto;
   display: flex;
   flex-direction: column;
@@ -181,4 +181,36 @@
 .time-info .highlight {
   color: #00d1ff;
   font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .flight-panel-wrapper {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .scene-wrapper {
+    height: 45vh;
+    min-height: 300px;
+  }
+
+  .timeline-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .player-controls {
+    justify-content: center;
+  }
+
+  .time-info {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .time-info span {
+    width: 45%; 
+    font-size: 11px;
+  }
 }
