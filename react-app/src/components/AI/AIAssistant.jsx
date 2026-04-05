@@ -11,7 +11,7 @@ const AIAssistant = ({ data }) => {
             "Аномалія 'Altitude becomes negative after t=21.8' вказує на можливе проникнення в ґрунт або дрейф датчика висоти після приземлення. Хоча надані точки телеметрії завершуються на t=21.6с, це є потенційним серйозним питанням, що потребує додаткових даних для верифікації та розуміння причин.",
             "Зниження швидкості до нуля після приземлення ('Velocity drops abruptly to 0 after landing') є очікуваною та нормальною поведінкою для БПЛА і не класифікується як аномалія."
         ],
-        "riskLevel": "MEDIUM"
+        "riskLevel": "HIGH"
     };
     const { t } = useTranslation();
 
@@ -90,7 +90,8 @@ const AIAssistant = ({ data }) => {
                     {openSections.risk && (
                         <div className="section-content risk-content">
                             <div className={`risk-indicator ${activeData.riskLevel.toLowerCase()}`}>
-                                <strong>{t('aiAssistant.lvlName')}</strong> {activeData.riskLevel}
+                                <strong>{t('aiAssistant.lvlName')}</strong>{' '}
+                                {t(`aiAssistant.riskState.${activeData.riskLevel.toLowerCase()}`)}
                             </div>
                             <p className="risk-note">
                                 {activeData.riskLevel === 'HIGH'
