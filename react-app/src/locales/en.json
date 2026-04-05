@@ -43,6 +43,6 @@
     "feature2Desc": "Interactive playback of the flight trajectory with accurate vehicle attitude in space.",
     "feature3Title": "AI Analytics",
     "feature3Desc": "Built-in assistant will analyze your flight and suggest improvements for your vehicle.",
-    "uploadHint": "Use the upload button in the top right corner to get started"
+    "uploadHint": "Use the upload button to get started"
   }
 }
