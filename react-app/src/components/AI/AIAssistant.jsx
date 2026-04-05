@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, AlertTriangle, Info } from 'lucide-react';
 import './AIAssistant.css';
+import { useTranslation } from 'react-i18next';
 
 const AIAssistant = ({ data }) => {
     const defaultData = {
@@ -12,6 +13,7 @@ const AIAssistant = ({ data }) => {
         ],
         "riskLevel": "MEDIUM"
     };
+    const { t } = useTranslation();
 
     const activeData = data || defaultData;
 
@@ -30,9 +32,9 @@ const AIAssistant = ({ data }) => {
             <div className="ai-main-header">
                 <div className="ai-title-group">
                     <div className="ai-logo-box"><Sparkles size={18} color="#61ff8c" /></div>
-                    <h3>AI Flight Assistant</h3>
+                    <h3>{t('aiAssistant.title')}</h3>
                 </div>
-                <div className="ai-status-dot">Live Analysis</div>
+                <div className="ai-status-dot">{t('aiAssistant.statusLive')}</div>
             </div>
 
             <div className="ai-sections-wrapper">
@@ -42,7 +44,7 @@ const AIAssistant = ({ data }) => {
                     <div className="section-trigger" onClick={() => toggleSection('feedback')}>
                         <div className="section-title">
                             <Activity size={18} className="icon-blue" />
-                            <span>Flight Summary (Feedback)</span>
+                            <span>{t('aiAssistant.sections.feedback')}</span>
                         </div>
                         <ChevronDown size={18} className="section-arrow" />
                     </div>
@@ -58,7 +60,7 @@ const AIAssistant = ({ data }) => {
                     <div className="section-trigger" onClick={() => toggleSection('details')}>
                         <div className="section-title">
                             <ListTree size={18} className="icon-green" />
-                            <span>Technical Analysis (Details)</span>
+                            <span>{t('aiAssistant.sections.details')}</span>
                         </div>
                         <ChevronDown size={18} className="section-arrow" />
                     </div>
@@ -81,19 +83,21 @@ const AIAssistant = ({ data }) => {
                     <div className="section-trigger" onClick={() => toggleSection('risk')}>
                         <div className="section-title">
                             <ShieldAlert size={18} className="icon-red" />
-                            <span>Risk Assessment (Risk Level)</span>
+                            <span>{t('aiAssistant.sections.risk')}</span>
                         </div>
                         <ChevronDown size={18} className="section-arrow" />
                     </div>
                     {openSections.risk && (
                         <div className="section-content risk-content">
                             <div className={`risk-indicator ${activeData.riskLevel.toLowerCase()}`}>
-                                <strong>Current Level:</strong> {activeData.riskLevel}
+                                <strong>{t('aiAssistant.lvlName')}</strong> {activeData.riskLevel}
                             </div>
                             <p className="risk-note">
-                                {activeData.riskLevel === 'MEDIUM'
-                                    ? "Потребує уваги технічного персоналу перед наступним вильотом."
-                                    : "Політ в межах норми або потребує критичної перевірки."}
+                                {activeData.riskLevel === 'HIGH'
+                                    ? t('aiAssistant.riskNotes.high')
+                                    : activeData.riskLevel === 'MEDIUM'
+                                        ? t('aiAssistant.riskNotes.medium')
+                                        : t('aiAssistant.riskNotes.low')}
                             </p>
                         </div>
                     )}
