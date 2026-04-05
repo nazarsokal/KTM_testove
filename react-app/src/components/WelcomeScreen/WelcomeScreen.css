@@ -101,6 +101,11 @@
   animation: pulseHint 2s infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .upload-hint {
+    animation: none;
+  }
+}
 @keyframes fadeIn {
   from {
     opacity: 0;
