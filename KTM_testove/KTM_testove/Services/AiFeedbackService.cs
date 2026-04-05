@@ -33,7 +33,6 @@ public class AiFeedbackService : IAiFeedbackService
         {
             summary = request.SummaryRequest,
             events = request.Events,
-            anomalies = request.Anomalies,
             points = pointsSample
         };
 

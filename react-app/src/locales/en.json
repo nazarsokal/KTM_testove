@@ -53,5 +53,16 @@
       "medium" : "MEDIUM",
       "low": "LOW"
     }
+  },
+  "welcome": {
+    "title": "Welcome to Telemetry Analysis System",
+    "subtitle": "Upload your flight log (.bin) to get detailed analytics, 3D visualization, and insights from the AI assistant.",
+    "feature1Title": "Precise Metrics",
+    "feature1Desc": "Haversine distance calculation, max speed, and acceleration with noise filtering.",
+    "feature2Title": "3D Visualization",
+    "feature2Desc": "Interactive playback of the flight trajectory with accurate vehicle attitude in space.",
+    "feature3Title": "AI Analytics",
+    "feature3Desc": "Built-in assistant will analyze your flight and suggest improvements for your vehicle.",
+    "uploadHint": "Use the upload button in the top right corner to get started"
   }
 }
