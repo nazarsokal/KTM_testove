@@ -2,20 +2,13 @@ import React, { useState } from 'react';
 import { Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, AlertTriangle, Info } from 'lucide-react';
 import './AIAssistant.css';
 import { useTranslation } from 'react-i18next';
+import { useAIContext } from '../../context/AIContext';
 
-const AIAssistant = ({ data }) => {
-    const defaultData = {
-        "feedback": "Цей політ БПЛА характеризувався швидким і потужним підйомом, досягнувши максимальної висоти 600.89 м за 9.6 секунд з високими вертикальними швидкостями та прискоренням. Апарат подолав значну горизонтальну відстань у 1234.13 м. Проте, під час фази спуску були зафіксовані значні коливання орієнтації (Attitude), що вказує на нестабільність польоту. Також відзначено потенційну проблему з показаннями висоти або взаємодією з ґрунтом після приземлення. Загалом, політ демонструє високу продуктивність, але з помітними проблемами стабільності під час спуску.",
-        "details": [
-            "Під час фази спуску (приблизно з t=9.6с до t=21.8с) дані телеметрії 'Att' (кути орієнтації) демонструють значні коливання, особливо помітні між t=13.6с і t=15.2с, де компонента X змінюється від -2.0796 до 1.3469, що підтверджує нестабільність, зазначену в аномаліях.",
-            "Аномалія 'Altitude becomes negative after t=21.8' вказує на можливе проникнення в ґрунт або дрейф датчика висоти після приземлення. Хоча надані точки телеметрії завершуються на t=21.6с, це є потенційним серйозним питанням, що потребує додаткових даних для верифікації та розуміння причин.",
-            "Зниження швидкості до нуля після приземлення ('Velocity drops abruptly to 0 after landing') є очікуваною та нормальною поведінкою для БПЛА і не класифікується як аномалія."
-        ],
-        "riskLevel": "HIGH"
-    };
+const AIAssistant = () => {
     const { t } = useTranslation();
 
-    const activeData = data || defaultData;
+    // Отримуємо реальні дані з бекенду через контекст
+    const { aiAnalysis, loading, error } = useAIContext();
 
     const [openSections, setOpenSections] = useState({
         feedback: false,
@@ -26,6 +19,35 @@ const AIAssistant = ({ data }) => {
     const toggleSection = (section) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
+
+    // Стан завантаження
+    if (loading) {
+        return (
+            <div className="ai-assistant-container skeleton-loading">
+                <div className="ai-main-header">
+                    <div className="ai-title-group">
+                        <Sparkles size={18} className="spinning-icon" />
+                        <h3>{t('aiAssistant.loading')}...</h3>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Стан помилки
+    if (error) {
+        return (
+            <div className="ai-assistant-container ai-error-state">
+                <div className="section-title icon-red" style={{ padding: '20px' }}>
+                    <AlertTriangle size={18} />
+                    <span>{t('aiAssistant.error')}: {error}</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Якщо даних немає
+    if (!aiAnalysis) return null;
 
     return (
         <div className="ai-assistant-container">
@@ -50,7 +72,8 @@ const AIAssistant = ({ data }) => {
                     </div>
                     {openSections.feedback && (
                         <div className="section-content feedback-bg">
-                            <p>{activeData.feedback}</p>
+                            {/* Виводимо текст напряму без використання хука useTypewriter */}
+                            <p>{aiAnalysis.feedback}</p>
                         </div>
                     )}
                 </div>
@@ -67,9 +90,12 @@ const AIAssistant = ({ data }) => {
                     {openSections.details && (
                         <div className="section-content">
                             <div className="details-stack">
-                                {activeData.details.map((item, idx) => (
+                                {aiAnalysis.details && aiAnalysis.details.map((item, idx) => (
                                     <div key={idx} className="detail-row">
-                                        {item.includes('Аномалія') ? <AlertTriangle size={14} color="#f59e0b" /> : <Info size={14} color="#3b82f6" />}
+                                        {(item.toLowerCase().includes('аномалія') || item.toLowerCase().includes('anomaly'))
+                                            ? <AlertTriangle size={14} color="#f59e0b" />
+                                            : <Info size={14} color="#3b82f6" />
+                                        }
                                         <p>{item}</p>
                                     </div>
                                 ))}
@@ -89,14 +115,14 @@ const AIAssistant = ({ data }) => {
                     </div>
                     {openSections.risk && (
                         <div className="section-content risk-content">
-                            <div className={`risk-indicator ${activeData.riskLevel.toLowerCase()}`}>
+                            <div className={`risk-indicator ${aiAnalysis.riskLevel.toLowerCase()}`}>
                                 <strong>{t('aiAssistant.lvlName')}</strong>{' '}
-                                {t(`aiAssistant.riskState.${activeData.riskLevel.toLowerCase()}`)}
+                                {t(`aiAssistant.riskState.${aiAnalysis.riskLevel.toLowerCase()}`)}
                             </div>
                             <p className="risk-note">
-                                {activeData.riskLevel === 'HIGH'
+                                {aiAnalysis.riskLevel === 'HIGH'
                                     ? t('aiAssistant.riskNotes.high')
-                                    : activeData.riskLevel === 'MEDIUM'
+                                    : aiAnalysis.riskLevel === 'MEDIUM'
                                         ? t('aiAssistant.riskNotes.medium')
                                         : t('aiAssistant.riskNotes.low')}
                             </p>
