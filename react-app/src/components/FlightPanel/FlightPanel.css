@@ -86,34 +86,66 @@
 /* --- Event markers on the 3D scene --- */
 .event-marker {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   position: relative;
   pointer-events: none;
+  user-select: none;
 }
 
 .event-dot {
-  width: 12px;
-  height: 12px;
+  /* Трохи зменшив саму крапку для акуратності */
+  width: 10px; 
+  height: 10px;
   background: #f85149;
   border: 2px solid #fff;
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(248, 81, 73, 0.8);
-  /* The dot is now exactly in the center of the 3D coordinate */
+  box-shadow: 0 0 8px rgba(248, 81, 73, 0.8);
+  z-index: 2;
 }
 
 .event-label {
   position: absolute;
-  bottom: 18px; /* Push the text up from the dot */
-  background: rgba(22, 27, 34, 0.9);
+  background: rgba(22, 27, 34, 0.85);
   border: 1px solid #f85149;
   color: #fff;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
+  
+  /* ЗМЕНШЕНІ ПАРАМЕТРИ ЛЕЙБЛА */
+  padding: 2px 6px; /* Було 4px 10px - тепер менше повітря навколо тексту */
+  border-radius: 4px; /* Менш круглі кути */
+  font-size: 10px; /* Було 12px - текст став компактнішим */
+  font-weight: 500; /* Було 600 - текст став тоншим і легшим */
+  
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); /* Зменшена тінь */
+  z-index: 1;
+}
+
+/* 4 позиції для алгоритму анти-накладання */
+/* Трохи зменшив відстань зсуву (з 15px до 12px), оскільки лейбли тепер менші */
+
+/* Top-Right (Вгору і Вправо) */
+.pos-tr { 
+  bottom: 50%; left: 50%; 
+  transform: translate(12px, -12px); 
+}
+
+/* Bottom-Right (Вниз і Вправо) */
+.pos-br { 
+  top: 50%; left: 50%; 
+  transform: translate(12px, 12px); 
+}
+
+/* Top-Left (Вгору і Вліво) */
+.pos-tl { 
+  bottom: 50%; right: 50%; 
+  transform: translate(-12px, -12px); 
+}
+
+/* Bottom-Left (Вниз і Вліво) */
+.pos-bl { 
+  top: 50%; right: 50%; 
+  transform: translate(-12px, 12px); 
 }
 
 /* --- Player (Timeline) --- */
@@ -123,11 +155,13 @@
   gap: 20px;
   width: 100%;
 }
+
 .player-controls {
   display: flex;
   gap: 10px;
   align-items: center;
 }
+
 .control-btn {
   display: flex;
   justify-content: center;
@@ -140,37 +174,45 @@
   transition: all 0.2s ease;
   color: #fff;
 }
+
 .play-pause-btn {
   background: linear-gradient(135deg, #00d1ff 0%, #0077ff 100%);
   box-shadow: 0 4px 15px rgba(0, 209, 255, 0.3);
 }
+
 .play-pause-btn:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(0, 209, 255, 0.5);
 }
+
 .play-icon-offset {
   margin-left: 3px;
 }
+
 .reset-btn {
   background: #21262d;
   border: 1px solid #30363d;
   color: #8b949e;
 }
+
 .reset-btn:hover {
   color: #c9d1d9;
   border-color: #8b949e;
 }
+
 .slider-wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .timeline-slider {
   width: 100%;
   cursor: pointer;
   accent-color: #00d1ff;
 }
+
 .time-info {
   display: flex;
   justify-content: space-between;
@@ -178,7 +220,38 @@
   color: #8b949e;
   font-weight: 500;
 }
+
 .time-info .highlight {
   color: #00d1ff;
   font-weight: 700;
 }
+@media (max-width: 768px) {
+  .flight-panel-wrapper {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .scene-wrapper {
+    height: 45vh;
+    min-height: 300px;
+  }
+
+  .timeline-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .player-controls {
+    justify-content: center;
+  }
+
+  .time-info {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .time-info span {
+    width: 45%; 
+    font-size: 11px;
+  }}

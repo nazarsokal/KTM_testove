@@ -1,37 +1,107 @@
-import React, { useState } from 'react';
-import { Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, AlertTriangle, Info, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { 
+    Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, 
+    AlertTriangle, Info, Loader2 
+} from 'lucide-react';
 import './AIAssistant.css';
 import { useTranslation } from 'react-i18next';
 import { useAIContext } from '../../context/AIContext';
+
+// Збільшено стандартне значення speed (з 10 на 30)
+const TypewriterText = ({ text, speed = 30, onComplete, delay = 0 }) => {
+    const [displayedText, setDisplayedText] = useState("");
+    const [started, setStarted] = useState(false);
+    const onCompleteRef = useRef(onComplete);
+
+    useEffect(() => {
+        onCompleteRef.current = onComplete;
+    }, [onComplete]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setStarted(true), delay);
+        return () => clearTimeout(timer);
+    }, [delay]);
+
+    useEffect(() => {
+        if (!started || !text) return;
+        setDisplayedText("");
+        let i = 0;
+        const interval = setInterval(() => {
+            i++;
+            setDisplayedText(text.slice(0, i));
+            if (i >= text.length) {
+                clearInterval(interval);
+                if (onCompleteRef.current) onCompleteRef.current();
+            }
+        }, speed);
+        return () => clearInterval(interval);
+    }, [started, text, speed]);
+
+    return (
+        <p className="typing-text">
+            {displayedText}
+            {started && displayedText.length < (text?.length || 0) && (
+                <span className="typing-cursor">|</span>
+            )}
+        </p>
+    );
+};
 
 const AIAssistant = () => {
     const { t } = useTranslation();
     const { aiAnalysis, loading, error } = useAIContext();
 
-    const [openSections, setOpenSections] = useState({
-        feedback: false,
-        details: false,
-        risk: false
-    });
+    const [renderStep, setRenderStep] = useState('none');
+    const [visibleDetailsCount, setVisibleDetailsCount] = useState(0);
+    const [openSections, setOpenSections] = useState({ feedback: true, details: true, risk: true });
+
+    const riskSectionRef = useRef(null);
+
+    useEffect(() => {
+        if (!loading && aiAnalysis) {
+            setRenderStep('feedback');
+            setVisibleDetailsCount(0);
+        } else if (loading) {
+            setRenderStep('none');
+        }
+    }, [loading, aiAnalysis]);
+
+    useEffect(() => {
+        if (renderStep === 'risk' && riskSectionRef.current) {
+            riskSectionRef.current.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+    }, [renderStep]);
+
+    const handleFeedbackComplete = useCallback(() => setRenderStep('details'), []);
+
+    const handleDetailComplete = useCallback(() => {
+        setVisibleDetailsCount(prev => prev + 1);
+    }, []);
+
+    useEffect(() => {
+        if (renderStep === 'details' && aiAnalysis?.details && visibleDetailsCount >= aiAnalysis.details.length) {
+            const timer = setTimeout(() => setRenderStep('risk'), 500);
+            return () => clearTimeout(timer);
+        }
+    }, [renderStep, visibleDetailsCount, aiAnalysis]);
 
     const toggleSection = (section) => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // Стан помилки (наприклад, API Key expired)
-    if (error) {
-        return (
-            <div className="ai-assistant-container ai-error-state">
-                <div className="section-title icon-red" style={{ padding: '20px' }}>
-                    <AlertTriangle size={18} />
-                    <span>{t('aiAssistant.error')}: {error}</span>
-                </div>
+    if (error) return (
+        <div className="ai-assistant-container ai-error-state">
+            <div className="section-title icon-red" style={{ padding: '20px' }}>
+                <AlertTriangle size={18} />
+                <span>{t('aiAssistant.error')}: {error}</span>
             </div>
-        );
-    }
+        </div>
+    );
 
-    // Якщо даних ще немає і завантаження не йде (файл не вибрано) — не рендеримо нічого
-    if (!aiAnalysis && !loading) return null;
+    if (!loading && !aiAnalysis) return null;
 
     return (
         <div className="ai-assistant-container">
@@ -42,106 +112,110 @@ const AIAssistant = () => {
                     </div>
                     <h3>{t('aiAssistant.title')}</h3>
                 </div>
-                <div className="ai-status-dot">
-                    {loading ? t('aiAssistant.statusAnalyzing') || "Аналізуємо..." : t('aiAssistant.statusLive')}
+                <div className={`ai-status-dot ${loading ? 'is-loading' : 'is-live'}`}>
+                    {loading ? t('aiAssistant.statusAnalyzing') : t('aiAssistant.statusLive')}
                 </div>
             </div>
 
             <div className="ai-sections-wrapper">
-
-                {/* СЕКЦІЯ 1: FEEDBACK */}
-                <div className={`ai-collapsible-section ${openSections.feedback ? 'is-open' : ''}`}>
-                    <div className="section-trigger" onClick={() => toggleSection('feedback')}>
-                        <div className="section-title">
-                            <Activity size={18} className="icon-blue" />
-                            <span>{t('aiAssistant.sections.feedback')}</span>
+                
+                {/* 1. FEEDBACK */}
+                {(loading || renderStep !== 'none') && (
+                    <div className={`ai-collapsible-section ${openSections.feedback ? 'is-open' : ''}`}>
+                        <div className="section-trigger" onClick={() => toggleSection('feedback')}>
+                            <div className="section-title">
+                                <Activity size={18} className="icon-blue" />
+                                <span>{t('aiAssistant.sections.feedback')}</span>
+                            </div>
+                            <ChevronDown size={18} className="section-arrow" />
                         </div>
-                        <ChevronDown size={18} className="section-arrow" />
-                    </div>
-                    {openSections.feedback && (
-                        <div className="section-content feedback-bg">
-                            {loading ? (
-                                <div className="ai-skeleton-text">
-                                    <div className="skeleton-line"></div>
-                                    <div className="skeleton-line"></div>
-                                    <div className="skeleton-line" style={{ width: '60%' }}></div>
-                                </div>
-                            ) : (
-                                <p>{aiAnalysis?.feedback}</p>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* СЕКЦІЯ 2: DETAILS */}
-                <div className={`ai-collapsible-section ${openSections.details ? 'is-open' : ''}`}>
-                    <div className="section-trigger" onClick={() => toggleSection('details')}>
-                        <div className="section-title">
-                            <ListTree size={18} className="icon-green" />
-                            <span>{t('aiAssistant.sections.details')}</span>
-                        </div>
-                        <ChevronDown size={18} className="section-arrow" />
-                    </div>
-                    {openSections.details && (
-                        <div className="section-content">
-                            <div className="details-stack">
+                        {openSections.feedback && (
+                            <div className="section-content highlight-text feedback-bg">
                                 {loading ? (
-                                    [1, 2, 3].map(i => (
-                                        <div key={i} className="detail-row skeleton-row">
-                                            <div className="skeleton-icon"></div>
-                                            <div className="skeleton-line" style={{ height: '12px' }}></div>
-                                        </div>
-                                    ))
+                                    <div className="ai-skeleton-text">
+                                        <div className="skeleton-line"></div>
+                                        <div className="skeleton-line" style={{ width: '60%' }}></div>
+                                    </div>
                                 ) : (
-                                    aiAnalysis?.details?.map((item, idx) => (
-                                        <div key={idx} className="detail-row">
-                                            {(item.toLowerCase().includes('аномалія') || item.toLowerCase().includes('anomaly'))
-                                                ? <AlertTriangle size={14} color="#f59e0b" />
-                                                : <Info size={14} color="#3b82f6" />
-                                            }
-                                            <p>{item}</p>
-                                        </div>
-                                    ))
+                                    <TypewriterText 
+                                        text={aiAnalysis?.feedback} 
+                                        speed={30} // Встановлено повільнішу швидкість для відгуку
+                                        onComplete={handleFeedbackComplete} 
+                                    />
                                 )}
                             </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* СЕКЦІЯ 3: RISK LEVEL */}
-                <div className={`ai-collapsible-section ${openSections.risk ? 'is-open' : ''}`}>
-                    <div className="section-trigger" onClick={() => toggleSection('risk')}>
-                        <div className="section-title">
-                            <ShieldAlert size={18} className="icon-red" />
-                            <span>{t('aiAssistant.sections.risk')}</span>
-                        </div>
-                        <ChevronDown size={18} className="section-arrow" />
+                        )}
                     </div>
-                    {openSections.risk && (
-                        <div className="section-content risk-content">
-                            {loading ? (
-                                <div className="skeleton-risk">
-                                    <div className="skeleton-badge"></div>
-                                    <div className="skeleton-line" style={{ width: '80%', marginTop: '10px' }}></div>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className={`risk-indicator ${aiAnalysis?.riskLevel?.toLowerCase()}`}>
-                                        <strong>{t('aiAssistant.lvlName')}</strong>{' '}
-                                        {t(`aiAssistant.riskState.${aiAnalysis?.riskLevel?.toLowerCase()}`)}
-                                    </div>
-                                    <p className="risk-note">
-                                        {aiAnalysis?.riskLevel === 'HIGH'
-                                            ? t('aiAssistant.riskNotes.high')
-                                            : aiAnalysis?.riskLevel === 'MEDIUM'
-                                                ? t('aiAssistant.riskNotes.medium')
-                                                : t('aiAssistant.riskNotes.low')}
-                                    </p>
-                                </>
-                            )}
+                )}
+
+                {/* 2. DETAILS */}
+                {(loading || (['details', 'risk', 'finished'].includes(renderStep))) && (
+                    <div className={`ai-collapsible-section ${openSections.details ? 'is-open' : ''} animate-section-in`}>
+                        <div className="section-trigger" onClick={() => toggleSection('details')}>
+                            <div className="section-title">
+                                <ListTree size={18} className="icon-green" />
+                                <span>{t('aiAssistant.sections.details')}</span>
+                            </div>
+                            <ChevronDown size={18} className="section-arrow" />
                         </div>
-                    )}
-                </div>
+                        {openSections.details && (
+                            <div className="section-content highlight-text">
+                                <div className="details-stack">
+                                    {loading ? (
+                                        [1, 2].map(i => <div key={i} className="skeleton-row"><div className="skeleton-icon"></div><div className="skeleton-line" style={{width: '75%'}}></div></div>)
+                                    ) : (
+                                        aiAnalysis?.details?.map((item, idx) => (
+                                            idx <= visibleDetailsCount && (
+                                                <div key={idx} className="detail-row">
+                                                    {item.toLowerCase().includes('аномалія') ? <AlertTriangle size={14} color="#f59e0b" /> : <Info size={14} color="#3b82f6" />}
+                                                    <TypewriterText 
+                                                        text={item} 
+                                                        speed={25} // Збільшено з 8 до 25 для списку деталей
+                                                        onComplete={idx === visibleDetailsCount ? handleDetailComplete : null}
+                                                    />
+                                                </div>
+                                            )
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 3. RISK LEVEL */}
+                {(loading || (['risk', 'finished'].includes(renderStep))) && (
+                    <div 
+                        ref={riskSectionRef}
+                        className={`ai-collapsible-section ${openSections.risk ? 'is-open' : ''} animate-section-in`}
+                    >
+                        <div className="section-trigger" onClick={() => toggleSection('risk')}>
+                            <div className="section-title">
+                                <ShieldAlert size={18} className="icon-red" />
+                                <span>{t('aiAssistant.sections.risk')}</span>
+                            </div>
+                            <ChevronDown size={18} className="section-arrow" />
+                        </div>
+                        {openSections.risk && (
+                            <div className="section-content risk-content highlight-text">
+                                {loading ? (
+                                    <div className="skeleton-risk"><div className="skeleton-badge"></div></div>
+                                ) : (
+                                    <div className="animate-in">
+                                        <div className={`risk-indicator ${aiAnalysis?.riskLevel?.toLowerCase()}`}>
+                                            <strong>{t('aiAssistant.lvlName')}</strong> {t(`aiAssistant.riskState.${aiAnalysis?.riskLevel?.toLowerCase()}`)}
+                                        </div>
+                                        <TypewriterText 
+                                            text={aiAnalysis?.riskLevel === 'HIGH' ? t('aiAssistant.riskNotes.high') : aiAnalysis?.riskLevel === 'MEDIUM' ? t('aiAssistant.riskNotes.medium') : t('aiAssistant.riskNotes.low')} 
+                                            speed={35} // Збільшено з 15 до 35 для фінального висновку
+                                            onComplete={() => setRenderStep('finished')}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );

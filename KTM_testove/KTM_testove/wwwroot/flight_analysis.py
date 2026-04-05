@@ -214,7 +214,6 @@ for i in range(len(df_flight)):
     })
 
 events = []
-if takeoff_event: events.append(takeoff_event)
 
 def find_point(raw_df, idx):
     rel_t = round((raw_df.iloc[idx]['TimeUS'] - start_time) / 1e6, 2)
