@@ -60,7 +60,6 @@ function FlightScene({ onToggleFullscreen, isFullscreen }) {
       };
 
     let minX = Infinity, maxX = -Infinity, minYVal = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
-    let minX = Infinity, maxX = -Infinity, minYVal = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
 
     trajectory.forEach((p) => {
       const x = p.pos[0], y = p.pos[2], z = -p.pos[1];
@@ -95,7 +94,6 @@ function FlightScene({ onToggleFullscreen, isFullscreen }) {
     };
   }, [trajectory]);
 
-  const { currentPosition, currentQuaternion, currentRoll } = useMemo(() => {
   const { currentPosition, currentQuaternion, currentRoll } = useMemo(() => {
     if (!trajectory?.length)
       return { 
@@ -152,52 +150,15 @@ function FlightScene({ onToggleFullscreen, isFullscreen }) {
     quaternion.setFromRotationMatrix(matrix);
 
     return { currentPosition: pos, currentQuaternion: quaternion, currentRoll: roll };
-      return { currentPosition: pos, currentQuaternion: quaternion, currentRoll: 0 }; 
-    }
-
-    let direction = new THREE.Vector3();
-    let isMoving = false;
-
-    if (timeIndex < trajectory.length - 1) {
-      const lookAhead = 4;
-      const targetIdx = Math.min(timeIndex + lookAhead, trajectory.length - 1);
-      const nextPos = new THREE.Vector3(trajectory[targetIdx].pos[0], trajectory[targetIdx].pos[2], -trajectory[targetIdx].pos[1]);
-
-      if (pos.distanceToSquared(nextPos) > 0.001) {
-        direction.subVectors(nextPos, pos).normalize();
-        isMoving = true;
-      }
-    }
-
-    if (!isMoving && timeIndex > 0) {
-      for (let i = timeIndex - 1; i >= 0; i--) {
-        const prevPos = new THREE.Vector3(trajectory[i].pos[0], trajectory[i].pos[2], -trajectory[i].pos[1]);
-        if (pos.distanceToSquared(prevPos) > 0.001) {
-          direction.subVectors(pos, prevPos).normalize();
-          isMoving = true;
-          break;
-        }
-      }
-    }
-
-    if (!isMoving) direction.set(0, 1, 0);
-
-    const matrix = new THREE.Matrix4();
-    const upVector = Math.abs(direction.y) > 0.99 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0);
-    matrix.lookAt(pos, pos.clone().add(direction), upVector);
-    quaternion.setFromRotationMatrix(matrix);
-
-    return { currentPosition: pos, currentQuaternion: quaternion, currentRoll: roll };
   }, [trajectory, timeIndex]);
 
   const activeTarget = camMode === "overview" ? centerPosition : currentPosition;
 
-  // НОВА ЛОГІКА: Розраховуємо позиції івентів, щоб вони не накладалися і були вище/нижче
+  // Логіка розрахунку позицій івентів, щоб вони не накладалися
   const eventMarkers = useMemo(() => {
     if (!trajectory?.length || !events?.length) return [];
     
     const markers = [];
-    // Змінив класи, щоб позиціонувати 'Max Altitude' завжди зверху
     const cssClasses = ['pos-tr', 'pos-tl', 'pos-br', 'pos-bl']; 
     const threshold = Math.max(trajectorySpan * 0.15, 50);
 
@@ -209,10 +170,9 @@ function FlightScene({ onToggleFullscreen, isFullscreen }) {
       
       let posClass = cssClasses[closeCount % 4];
       
-      // Жорстке правило для Max Altitude: завжди зверху (pos-tr або pos-tl)
       const eventName = ev.event || ev.name || "Event";
       if (eventName.toLowerCase().includes("altitude") || eventName.toLowerCase().includes("apogee")) {
-        posClass = cssClasses[closeCount % 2]; // 0 або 1 (top-right або top-left)
+        posClass = cssClasses[closeCount % 2]; 
       }
 
       markers.push({
@@ -264,7 +224,6 @@ function FlightScene({ onToggleFullscreen, isFullscreen }) {
             <RocketMarker
               position={currentPosition}
               quaternion={currentQuaternion}
-              roll={currentRoll}
               roll={currentRoll}
               vehicleType={vehicleType}
               scale={35}
