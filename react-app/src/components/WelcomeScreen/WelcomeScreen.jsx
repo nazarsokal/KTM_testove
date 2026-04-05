@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Rocket, BarChart3, Bot, ArrowUpRight } from "lucide-react";
+import { Rocket, BarChart3, Bot } from "lucide-react"; // Видалили ArrowUpRight звідси
 import "./WelcomeScreen.css";
 
 function WelcomeScreen() {
@@ -44,7 +44,7 @@ function WelcomeScreen() {
 
       <div className="upload-hint">
         <span>{t("welcome.uploadHint")}</span>
-        <ArrowUpRight size={20} className="hint-icon" />
+        {/* Компонент зі стрілочкою успішно видалено */}
       </div>
     </div>
   );

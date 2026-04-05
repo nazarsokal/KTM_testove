@@ -133,3 +133,29 @@
     box-shadow: 0 0 0 0 rgba(0, 209, 255, 0);
   }
 }
+
+@media (max-width: 768px) {
+  .welcome-container {
+    padding: 30px 15px;
+  }
+
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+  
+  .welcome-subtitle {
+    font-size: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .upload-hint {
+    flex-direction: column;
+    text-align: center;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+}

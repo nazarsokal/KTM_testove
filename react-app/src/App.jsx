@@ -50,7 +50,7 @@ function App() {
               <FlightPanel />
             </section>
 
-            <section className="ai-section" style={{ margin: "20px" }}>
+            <section className="ai-section">
               <AIAssistant />
             </section>
           </>
