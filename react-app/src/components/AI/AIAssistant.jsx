@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, AlertTriangle, Info } from 'lucide-react';
+import { Sparkles, ShieldAlert, ListTree, Activity, ChevronDown, AlertTriangle, Info, Loader2 } from 'lucide-react';
 import './AIAssistant.css';
 import { useTranslation } from 'react-i18next';
 import { useAIContext } from '../../context/AIContext';
 
 const AIAssistant = () => {
     const { t } = useTranslation();
-
-    // Отримуємо реальні дані з бекенду через контекст
     const { aiAnalysis, loading, error } = useAIContext();
 
     const [openSections, setOpenSections] = useState({
@@ -20,21 +18,7 @@ const AIAssistant = () => {
         setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
 
-    // Стан завантаження
-    if (loading) {
-        return (
-            <div className="ai-assistant-container skeleton-loading">
-                <div className="ai-main-header">
-                    <div className="ai-title-group">
-                        <Sparkles size={18} className="spinning-icon" />
-                        <h3>{t('aiAssistant.loading')}...</h3>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Стан помилки
+    // Стан помилки (наприклад, API Key expired)
     if (error) {
         return (
             <div className="ai-assistant-container ai-error-state">
@@ -46,22 +30,26 @@ const AIAssistant = () => {
         );
     }
 
-    // Якщо даних немає
-    if (!aiAnalysis) return null;
+    // Якщо даних ще немає і завантаження не йде (файл не вибрано) — не рендеримо нічого
+    if (!aiAnalysis && !loading) return null;
 
     return (
         <div className="ai-assistant-container">
             <div className="ai-main-header">
                 <div className="ai-title-group">
-                    <div className="ai-logo-box"><Sparkles size={18} color="#61ff8c" /></div>
+                    <div className="ai-logo-box">
+                        {loading ? <Loader2 size={18} className="animate-spin" color="#61ff8c" /> : <Sparkles size={18} color="#61ff8c" />}
+                    </div>
                     <h3>{t('aiAssistant.title')}</h3>
                 </div>
-                <div className="ai-status-dot">{t('aiAssistant.statusLive')}</div>
+                <div className="ai-status-dot">
+                    {loading ? t('aiAssistant.statusAnalyzing') || "Аналізуємо..." : t('aiAssistant.statusLive')}
+                </div>
             </div>
 
             <div className="ai-sections-wrapper">
 
-                {/* СЕКЦІЯ 1: FEEDBACK (SUMMARY) */}
+                {/* СЕКЦІЯ 1: FEEDBACK */}
                 <div className={`ai-collapsible-section ${openSections.feedback ? 'is-open' : ''}`}>
                     <div className="section-trigger" onClick={() => toggleSection('feedback')}>
                         <div className="section-title">
@@ -72,8 +60,15 @@ const AIAssistant = () => {
                     </div>
                     {openSections.feedback && (
                         <div className="section-content feedback-bg">
-                            {/* Виводимо текст напряму без використання хука useTypewriter */}
-                            <p>{aiAnalysis.feedback}</p>
+                            {loading ? (
+                                <div className="ai-skeleton-text">
+                                    <div className="skeleton-line"></div>
+                                    <div className="skeleton-line"></div>
+                                    <div className="skeleton-line" style={{ width: '60%' }}></div>
+                                </div>
+                            ) : (
+                                <p>{aiAnalysis?.feedback}</p>
+                            )}
                         </div>
                     )}
                 </div>
@@ -90,15 +85,24 @@ const AIAssistant = () => {
                     {openSections.details && (
                         <div className="section-content">
                             <div className="details-stack">
-                                {aiAnalysis.details && aiAnalysis.details.map((item, idx) => (
-                                    <div key={idx} className="detail-row">
-                                        {(item.toLowerCase().includes('аномалія') || item.toLowerCase().includes('anomaly'))
-                                            ? <AlertTriangle size={14} color="#f59e0b" />
-                                            : <Info size={14} color="#3b82f6" />
-                                        }
-                                        <p>{item}</p>
-                                    </div>
-                                ))}
+                                {loading ? (
+                                    [1, 2, 3].map(i => (
+                                        <div key={i} className="detail-row skeleton-row">
+                                            <div className="skeleton-icon"></div>
+                                            <div className="skeleton-line" style={{ height: '12px' }}></div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    aiAnalysis?.details?.map((item, idx) => (
+                                        <div key={idx} className="detail-row">
+                                            {(item.toLowerCase().includes('аномалія') || item.toLowerCase().includes('anomaly'))
+                                                ? <AlertTriangle size={14} color="#f59e0b" />
+                                                : <Info size={14} color="#3b82f6" />
+                                            }
+                                            <p>{item}</p>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     )}
@@ -115,21 +119,29 @@ const AIAssistant = () => {
                     </div>
                     {openSections.risk && (
                         <div className="section-content risk-content">
-                            <div className={`risk-indicator ${aiAnalysis.riskLevel.toLowerCase()}`}>
-                                <strong>{t('aiAssistant.lvlName')}</strong>{' '}
-                                {t(`aiAssistant.riskState.${aiAnalysis.riskLevel.toLowerCase()}`)}
-                            </div>
-                            <p className="risk-note">
-                                {aiAnalysis.riskLevel === 'HIGH'
-                                    ? t('aiAssistant.riskNotes.high')
-                                    : aiAnalysis.riskLevel === 'MEDIUM'
-                                        ? t('aiAssistant.riskNotes.medium')
-                                        : t('aiAssistant.riskNotes.low')}
-                            </p>
+                            {loading ? (
+                                <div className="skeleton-risk">
+                                    <div className="skeleton-badge"></div>
+                                    <div className="skeleton-line" style={{ width: '80%', marginTop: '10px' }}></div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className={`risk-indicator ${aiAnalysis?.riskLevel?.toLowerCase()}`}>
+                                        <strong>{t('aiAssistant.lvlName')}</strong>{' '}
+                                        {t(`aiAssistant.riskState.${aiAnalysis?.riskLevel?.toLowerCase()}`)}
+                                    </div>
+                                    <p className="risk-note">
+                                        {aiAnalysis?.riskLevel === 'HIGH'
+                                            ? t('aiAssistant.riskNotes.high')
+                                            : aiAnalysis?.riskLevel === 'MEDIUM'
+                                                ? t('aiAssistant.riskNotes.medium')
+                                                : t('aiAssistant.riskNotes.low')}
+                                    </p>
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
-
             </div>
         </div>
     );
