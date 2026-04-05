@@ -5,10 +5,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddDefaultPolicy(policy =>
     {
-        policy
-            .WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+                "https://ktm-testove.vercel.app/",
+                "https://vercel.com/nazarsokals-projects/ktm-testove/rbdaaXaHN8LubhperB3nnd6BVs5v",
+                "http://localhost:5173", // Залишаємо для локального Vite
+                "http://localhost:3000"  // На всякий випадок для локальних тестів
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
