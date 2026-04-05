@@ -19,7 +19,7 @@ public class AiFeedbackService : IAiFeedbackService
         ApiKey  = Environment.GetEnvironmentVariable("NVIDIA_API_KEY_GEMINI") ?? throw new Exception("API Key не знайдено!");
     }
     
-    public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request, string language = "English")
+public async Task<AiAnalysisDto> GetFeedbackAsync(AiFeedbackRequest request, string language = "English")
 {
     _httpClient.DefaultRequestHeaders.Authorization =
         new AuthenticationHeaderValue("Bearer", ApiKey);
@@ -45,10 +45,13 @@ Respond ONLY in {language}.
 STRICT RULES:
 - RETURN ONLY VALID JSON
 - NO markdown
-- NO ```json
-- NO explanations outside JSON
+- NO explanations
 - DO NOT hallucinate
 - USE ONLY PROVIDED DATA
+
+IMPORTANT:
+- details MUST be an array of plain strings
+- DO NOT use objects inside details
 
 Coordinate system:
 - Z is relative altitude
@@ -59,23 +62,22 @@ Takeoff → ascent → peak → descent → landing → post-landing
 
 -------------------------------------
 
-Analyze:
-1. Performance (speed, acceleration, altitude)
-2. Stability (trajectory, oscillations)
-3. Safety (based on anomalies FIRST)
-
--------------------------------------
+ANALYSIS INSTRUCTIONS:
+1. Include specific numerical values (speed, altitude, acceleration, angles, time).
+2. details = 5-10 bullet points as STRINGS (not objects).
+3. RiskLevel must be: LOW, MEDIUM, or HIGH.
+4. Feedback = 4-6 sentences with numbers.
 
 INPUT DATA:
 {JsonConvert.SerializeObject(structuredData, Formatting.None)}
 
 -------------------------------------
 
-OUTPUT FORMAT:
+STRICT JSON SCHEMA:
 
 {{
-  ""feedback"": ""4-6 sentence technical summary"",
-  ""details"": [""bullet points""],
+  ""feedback"": ""string"",
+  ""details"": [""string""],
   ""riskLevel"": ""LOW | MEDIUM | HIGH""
 }}
 ";
@@ -85,76 +87,61 @@ OUTPUT FORMAT:
         model = "google/gemma-3n-e2b-it",
         messages = new[]
         {
-            new { role = "system", content = "You are a strict flight analysis AI. Return ONLY valid JSON." },
+            new { role = "system", content = "Return ONLY valid JSON." },
             new { role = "user", content = prompt }
         },
         temperature = 0.2,
         top_p = 0.7,
         max_tokens = 512,
-        stream = true
+        stream = false // 🔥 ВИМКНУЛИ STREAMING
     };
 
     using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
-    requestMessage.Content = new StringContent(JsonConvert.SerializeObject(body), Encoding.UTF8, "application/json");
-    requestMessage.Headers.Accept.Clear();
-    requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+    requestMessage.Content = new StringContent(
+        JsonConvert.SerializeObject(body),
+        Encoding.UTF8,
+        "application/json"
+    );
 
-    using var response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+    var response = await _httpClient.SendAsync(requestMessage);
+
     if (!response.IsSuccessStatusCode)
         throw new Exception($"AI API returned error {response.StatusCode}");
 
-    var textBuffer = new StringBuilder();
-
-    // Читаємо SSE поток
-    await using var stream = await response.Content.ReadAsStreamAsync();
-    using var reader = new StreamReader(stream);
-
-    while (!reader.EndOfStream)
-    {
-        var line = await reader.ReadLineAsync();
-        if (string.IsNullOrWhiteSpace(line) || !line.StartsWith("data:"))
-            continue;
-
-        var jsonPart = line.Substring("data:".Length).Trim();
-        if (jsonPart == "[DONE]") break;
-
-        try
-        {
-            var chunk = JObject.Parse(jsonPart);
-            var content = chunk["choices"]?[0]?["delta"]?["content"]?.ToString();
-            if (!string.IsNullOrEmpty(content))
-                textBuffer.Append(content);
-        }
-        catch
-        {
-            // Ігноруємо часткові фрагменти, які не є валідним JSON
-        }
-    }
-
-    var text = textBuffer.ToString().Trim();
-
-    // 🔥 fallback: якщо модель вернула текст + JSON
-    var jsonStart = text.IndexOf("{");
-    var jsonEnd = text.LastIndexOf("}");
-    if (jsonStart >= 0 && jsonEnd > jsonStart)
-        text = text.Substring(jsonStart, jsonEnd - jsonStart + 1);
+    var responseString = await response.Content.ReadAsStringAsync();
 
     try
     {
-        return JsonConvert.DeserializeObject<AiAnalysisDto>(text)
-               ?? new AiAnalysisDto
-               {
-                   Feedback = text,
-                   RiskLevel = "UNKNOWN"
-               };
+        var json = JObject.Parse(responseString);
+
+        var content = json["choices"]?[0]?["message"]?["content"]?.ToString();
+
+        if (string.IsNullOrWhiteSpace(content))
+            throw new Exception("Empty AI response");
+
+        content = content.Trim();
+
+        // 🔥 fallback: витягуємо JSON якщо модель додала текст
+        var jsonStart = content.IndexOf("{");
+        var jsonEnd = content.LastIndexOf("}");
+
+        if (jsonStart >= 0 && jsonEnd > jsonStart)
+            content = content.Substring(jsonStart, jsonEnd - jsonStart + 1);
+
+        var result = JsonConvert.DeserializeObject<AiAnalysisDto>(content);
+
+        if (result == null)
+            throw new Exception("Deserialization returned null");
+
+        return result;
     }
     catch
     {
         return new AiAnalysisDto
         {
-            Feedback = text,
+            Feedback = "Failed to parse AI response",
             RiskLevel = "UNKNOWN",
-            Details = new List<string> { "AI returned non-structured response" }
+            Details = new List<string> { responseString }
         };
     }
 }
