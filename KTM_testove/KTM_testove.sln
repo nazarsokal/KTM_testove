@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTM_testove", "KTM_testove\KTM_testove.csproj", "{620CF930-F4C6-4D47-9835-97A691D9F3B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KTM_testove_Unit_Testing", "KTM_testove_Unit_Testing\KTM_testove_Unit_Testing.csproj", "{82501F29-6346-470E-83DA-E8EDE70E8445}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{620CF930-F4C6-4D47-9835-97A691D9F3B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{620CF930-F4C6-4D47-9835-97A691D9F3B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{620CF930-F4C6-4D47-9835-97A691D9F3B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{620CF930-F4C6-4D47-9835-97A691D9F3B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82501F29-6346-470E-83DA-E8EDE70E8445}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82501F29-6346-470E-83DA-E8EDE70E8445}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82501F29-6346-470E-83DA-E8EDE70E8445}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82501F29-6346-470E-83DA-E8EDE70E8445}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
